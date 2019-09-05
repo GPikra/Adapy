@@ -21,6 +21,10 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0002):
+    """
+    #TODO:Add argument descriptions
+    """
+
     assert algorithm in ["adda", "wadda"], "Invalid choice of algorithm"
     assert isinstance(source_representer, K.engine.training.Model) and isinstance(source_classifier, K.engine.training.Model), \
     "Provide keras models for source encoder and classifier"
