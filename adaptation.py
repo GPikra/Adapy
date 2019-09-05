@@ -13,10 +13,20 @@ from batch_generator import DataGenerator
 
 class AdaPy():
 
-  def __init__(self, source_representer, source_classifier, index_to_label_dictionary = None, algorithm="adda", domain_discriminator = "linear"):
+  def __init__(self,
+   source_representer, 
+   source_classifier, 
+   index_to_label_dictionary = None, 
+   algorithm="adda", 
+   domain_discriminator = "linear", 
+   discriminator_lr = 0.001,
+   target_representer_lr = 0.0002):
     assert algorithm in ["adda", "wadda"], "Invalid choice of algorithm"
     assert isinstance(source_representer, K.engine.training.Model) and isinstance(source_classifier, K.engine.training.Model), \
     "Provide keras models for source encoder and classifier"
+
+    self.__discriminator_learning_rate = discriminator_lr
+    self.__target_representer_learning_rate = target_representer_lr
 
     self.__latent_dimensions = source_representer.output_shape
     self.__shape = source_representer.input_shape
@@ -41,15 +51,24 @@ class AdaPy():
     self.__source_classifier = clone_model(source_classifier)
     self.__source_classifier.set_weights(source_classifier.get_weights()) 
 
+    representer_input = l.Input(self.input_shape)
 
-    # representer_input = l.Input(self.__shape)
+    source_representer_output = self.__source_representer(representer_input)
+    source_classifier = self.__source_classifier(source_representer_output)
+    self.__source_model = Model(representer_input, source_classifier)
 
-    # source_representer_output = self.__source_representer(representer_input)
-    # source_classifier = self.__source_classifier(source_representer_output)
-    # self.__source_model = Model(representer_input, source_classifier)
+    target_representer_output = self.__target_representer(representer_input)
+    domain_discriminator_o_target_representer = self.__domain_discriminator(target_representer_output)
+    self.__train_target = Model(representer_input, domain_discriminator_o_target_representer)
 
+    self.compile_models()
 
-
+  def compile_models(self):
+    if self.__algorithm == "adda":
+      self.__domain_discriminator.trainable = True
+      self.__domain_discriminator.compile(loss="binary_crossentropy", optimizer = o.Adam(lr=self.__discriminator_learning_rate))
+      self.__domain_discriminator.trainable = False
+      self.__train_target.compile(loss="binary_crossentropy", optimizer = o.Adam(lr=self.__target_representer_learning_rate))
 
 
   def __build_domain_discriminator(self):
@@ -57,63 +76,93 @@ class AdaPy():
       latent_representation = l.Input(self.__latent_dimensions)
       classifier = l.Dense(1, activation="sigmoid")(latent_representation)
       domain_discriminator = Model(latent_representation, classifier)
-      domain_discriminator.compile(loss="binary_crossentropy", optimizer = o.Adam())
     return domain_discriminator
 
+
+  @property
+  def domain_discriminator_lr(self):
+    return self.__discriminator_learning_rate
+  
+
+  @domain_discriminator_lr.setter
+  def domain_discriminator_lr(self, value):
+    self.__discriminator_learning_rate = value
+
+
+  @property
+  def target_lr(self):
+    return self.__target_representer_learning_rate
+  
+
+  @target_lr.setter
+  def target_lr(self, value):
+    self.__target_representer_learning_rate = value
 
 
   @property
   def domain_discriminator(self):
     return self.__domain_discriminator
 
+
   @property
   def nlabels(self):
     return self.__nlabels
+
 
   @property
   def latent_dimensions(self):
     return self.__latent_dimensions
 
+
   @property
   def input_shape(self):
     return self.__shape[1:]
+
 
   @property
   def source_classifier(self):
     return self.__source_classifier
 
+
   @property
   def source_representer(self):
     return self.__source_representer
+
 
   @property
   def source_classifier_summary(self):
     self.__source_classifier.summary()
 
+
   @property
   def source_representer_summary(self):
     self.__source_representer.summary()
+
 
   @property
   def source_model(self):
     return self.__source_model
 
+
   @property
   def source_model_summary(self):
     self.__source_model.summary()
+
 
   @property
   def target_data(self):
     return self.__target_data
 
+
   @target_data.setter
   def target_data(self, value):
-    if isinstance(np.array((0,1)), str):
-      assert os.path.exists(value)
+    if isinstance(value, str):
+      assert os.path.exists(value), "Invalid target domain directory"
+
 
 
 
 
     if isinstance(value, np.ndarray):
-      assert value.shape == self.__shape
+      assert value.shape == self.__shape, "Invalid target domain dimensions"
       self.__target_data = value
