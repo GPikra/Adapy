@@ -4,11 +4,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import keras
 import numpy as np
 from keras.models import save_model, load_model
-from batch_generator import DataGenerator
+from batch_generator import BatchGenerator
 import os
 import imageio
+from auxilliary import crawl_directory
 
-path = '/home/demokritoscil/Desktop/dftimages_L/'
+path = '/home/demokritoscil/Desktop/dftimages_L'
+new = crawl_directory(path)
 list_of_filenames = os.listdir(path)
 
 list_of_data_names = []
@@ -21,10 +23,10 @@ for name in list_of_data_names:
     _,label = name.split('action_')
     label = label[:-2]
     labels[name] = int(label)
-
-
-genarate_batches = DataGenerator(list_of_data_names, labels, batch_size=128, dim=(159,75), n_channels=4,
-                 n_classes=51, shuffle=True)
-one_batch_X , one_batch_y = genarate_batches.__getitem__(1, path, extension)
-print(one_batch_X.shape)
+print(new[0])
+print(list_of_data_names[0])
+# genarate_batches = BatchGenerator(list_of_data_names, labels, batch_size=128, dim=(159,75), n_channels=4,
+#                  n_classes=51, shuffle=True)
+# one_batch_X , one_batch_y = genarate_batches.__getitem__(1, path, extension)
+# print(one_batch_X.shape)
 
