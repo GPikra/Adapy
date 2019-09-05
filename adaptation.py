@@ -15,7 +15,11 @@ class AdaPy():
     self.__source_classifier = clone_model(source_classifier)
     self.__source_classifier.set_weights(source_classifier.get_weights()) 
 
-    self.__shape = source_representer.input_shape()
+    self.__shape = source_representer.input_shape
+
+  @property
+  def input_shape(self):
+    return self.__shape[1:]
 
   @property
   def target_data(self):
@@ -23,8 +27,12 @@ class AdaPy():
 
   @target_data.setter
   def target_data(self, value):
-    if type(value) == str:
+    if isinstance(np.array((0,1)), str):
       assert os.path.exists(value)
-    if type(value) == numpy.array:
+      
+
+
+
+    if isinstance(value, np.ndarray):
       assert value.shape == self.__shape
-    self.__target_data = value
+      self.__target_data = value
