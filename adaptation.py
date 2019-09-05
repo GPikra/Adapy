@@ -1,5 +1,6 @@
 import keras as K
 from keras.models import clone_model
+import os
 
 class AdaPy():
 
@@ -13,3 +14,17 @@ class AdaPy():
 
     self.__source_classifier = clone_model(source_classifier)
     self.__source_classifier.set_weights(source_classifier.get_weights()) 
+
+    self.__shape = source_representer.input_shape()
+
+  @property
+  def target_data(self):
+    return self.__target_data
+
+  @target_data.setter
+  def target_data(self, value):
+    if type(value) == str:
+      assert os.path.exists(value)
+    if type(value) == numpy.array:
+      assert value.shape == self.__shape
+    self.__target_data = value
