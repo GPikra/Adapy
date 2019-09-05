@@ -162,7 +162,7 @@ class AdaPy():
   def target_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
-
+      
 
 
 

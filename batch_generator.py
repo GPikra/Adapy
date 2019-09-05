@@ -9,6 +9,9 @@ class BatchGenerator(keras.utils.Sequence):
 
   def __init__(self, list_of_data_names, labels={}, batch_size=128, dim=(159,75), n_channels=4,
                  n_classes=51, shuffle=True):
+    """
+    #TODO: explain arguments
+    """
 
     self.dim = dim
     self.batch_size = batch_size
