@@ -2,7 +2,7 @@ import keras
 import random
 import numpy as np
 
-from auxilliary import crawl_directory, get_class, read_image
+from auxilliary import crawl_directory, get_class, read_image, map_labels
 
 #https://github.com/afshinea/keras-data-generator
 
@@ -11,8 +11,11 @@ class BatchGenerator(keras.utils.Sequence):
   def __init__(self, target_directory, batch_size, dimension, nchannels,
                  nclasses, shuffle=True, is_labeled=True):
     """
-    #TODO: explain arguments
-    #TODO: explain labels {}
+    target_directory : absolute or relative path of the folder, where data files exist in
+    batch_size       : number of samples each batch consist of
+    dimension        : dimension of the input data
+    nchannels        : number of channels in input data
+    nclasses         : number of classes to categorise data
     """
 
     self.__dimension_input = dimension
@@ -25,7 +28,10 @@ class BatchGenerator(keras.utils.Sequence):
 
     self.__crawled_directory = crawl_directory(self.__target_directory)
     self.__datasetSize = len(self.__crawled_directory)
-
+    if self.__is_labeled:
+      self.__labels = map_labels(self.__crawled_directory)
+    else:
+      self.__labels = {}
     self.on_epoch_end()
 
     
@@ -62,5 +68,17 @@ class BatchGenerator(keras.utils.Sequence):
     X = np.empty((self.__batch_size, *self.__dimension_input, self.__nchannels))
     y = np.empty((self.__batch_size), dtype=np.int8)
     for i, filename in enumerate(list_of_batch_files):
-      X[i], y[i] = read_image(filename, self.__is_labeled)
+      X[i], y[i] = read_image(filename, self.__labels, self.__is_labeled)
     return X, y
+
+
+class BatchGenerator_Numpy():
+
+  def __init__(self, data, batch_size):
+    assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
+    self.__data = data
+    self.__batch_size = batch_size
+
+  def __getitem__(self):
+    idx = np.random.randint(0, self__data.shape[0], self.__batch_size)
+    return self.__data[idx]
