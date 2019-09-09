@@ -15,12 +15,13 @@ class AdaPy():
 
   def __init__(self,
    source_representer, 
-   source_classifier, 
+   source_classifier,
    index_to_label_dictionary = None, 
    algorithm="adda", 
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
-   target_representer_lr = 0.0002):
+   target_representer_lr = 0.0002,
+   ):
     """
     #TODO:Add argument descriptions
     """
@@ -35,6 +36,7 @@ class AdaPy():
     self.__latent_dimensions = source_representer.output_shape
     self.__shape = source_representer.input_shape
     self.__nlabels = source_classifier.output_shape
+    self.__batch_size = batch_size
 
     self.__algorithm = algorithm
 
@@ -82,6 +84,46 @@ class AdaPy():
       domain_discriminator = Model(latent_representation, classifier)
     return domain_discriminator
 
+  #TODO: Xtarget, Xsource, handle arguments
+  def fit(self, Xtarget, Xsource, epochs=self.__epochs,):
+    #TODO:add argument desctiption
+    if self.__algorithm == 'adda':
+      if isinstance(self.target_data, np.ndarray):
+        source_label = np.ones((self__batch_size, 1))
+        target_label = np.zeros((self__batch_size, 1))
+          
+        self.__domain_discriminator.summary()
+        self.self.__train_target.summary()
+
+        X_train = BatchGenerator_Numpy(self.__target_data, self.__batch_size)
+        X_source = BatchGenerator_Numpy(self.__source_data, self.__batch_size)
+
+        for epoch in range(1,epochs):
+          discriminator_iterations = 10
+          if epoch == 1:
+            discriminator_iterations = 25
+          for _ in range(discriminator_iterations):
+            target_data = X_train.get_batch()
+            source_data = X_source.get_batch()
+            #TODO:issue Tensorboard   
+            target_latent = self.target.predict(target_data)
+
+            d_loss_target = self.__domain_discriminator.train_on_batch(target_latent, target_label)
+            source_latent = self.__source_representer.predict(source_data)   
+
+            d_loss_source = self.__domain_discriminator.train_on_batch(source_latent, source_label)
+          
+
+            target_loss = self.__train_target.train_on_batch(target_data, source_label)
+              
+        
+                  
+
+
+      if isinstance(self.target_data, BatchGenerator):
+        #TODO: Add Batchgenerator training functionality
+
+        pass
 
   @property
   def domain_discriminator_lr(self):
@@ -102,6 +144,17 @@ class AdaPy():
   def target_lr(self, value):
     self.__target_representer_learning_rate = value
 
+  #TODO:Issue
+  @property
+  def batch_size(self):
+    return self.__batch_size
+  
+
+  @batch_size.setter
+  def batch_size(self, value):
+    assert (value > 0) and (value < self.)
+    self.__batch_size = value
+
 
   @property
   def domain_discriminator(self):
@@ -121,6 +174,7 @@ class AdaPy():
   @property
   def input_shape(self):
     return self.__shape[1:]
+
 
 
   @property
@@ -162,11 +216,24 @@ class AdaPy():
   def target_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
-      
-
-
-
+      self.__target_generator = BatchGenerator()
 
     if isinstance(value, np.ndarray):
       assert value.shape == self.__shape, "Invalid target domain dimensions"
       self.__target_data = value
+
+# ----------------- Source ----------------------- #
+  @property
+  def source_data(self):
+    return self.__source_data
+
+
+  @target_data.setter
+  def source_data(self, value):
+    if isinstance(value, str):
+      assert os.path.exists(value), "Invalid source domain directory"
+      self.__source_generator = BatchGenerator()
+    #TODO: Batchgenerator_Numpy
+    if isinstance(value, np.ndarray):
+      assert value.shape == self.__shape, "Invalid source domain dimensions"
+      self.__source_data = value
