@@ -154,7 +154,7 @@ class AdaPy():
 
   @batch_size.setter
   def batch_size(self, value):
-    assert (value > 0) and (value < self.)
+    # assert (value > 0) and (value < self.)
     self.__batch_size = value
 
   #TODO:add description
