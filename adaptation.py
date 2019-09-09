@@ -93,8 +93,8 @@ class AdaPy():
     self.source_data = Xsource
     if self.__algorithm == 'adda':
       if isinstance(self.target_data, np.ndarray):
-        source_label = np.ones((self__batch_size, 1))
-        target_label = np.zeros((self__batch_size, 1))
+        source_label = np.ones((self.__batch_size, 1))
+        target_label = np.zeros((self.__batch_size, 1))
 
         for epoch in range(epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
