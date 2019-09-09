@@ -16,6 +16,8 @@ class BatchGenerator(keras.utils.Sequence):
     dimension        : dimension of the input data
     nchannels        : number of channels in input data
     nclasses         : number of classes to categorise data
+    shuffle          : boolean that indicates if indices of data should be shuffled or not
+    is_labeled       : boolean that shows if labels exist or not  
     """
 
     self.__dimension_input = dimension
@@ -78,6 +80,12 @@ class BatchGenerator(keras.utils.Sequence):
 class BatchGenerator_Numpy():
 
   def __init__(self, data, batch_size, shuffle=True):
+    """
+    data       : numpy array of data
+    batch_size : number of samples each batch consist of
+    shuffle    : boolean that indicates if indices of data should be shuffled or not
+    """
+
     assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
     self.__data = data
     self.__batch_size = batch_size

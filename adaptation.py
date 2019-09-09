@@ -32,6 +32,21 @@ class AdaPy():
    ):
     """
     #TODO:Add argument descriptions
+    source_representer                       : model be trained by source data
+    source_classifier                        : model of classifier be trained by source data
+    index_to_label_dictionary                : specific way to index labels              #not sure what you mean
+    algorithm                                : adda or wadda algorithm choice for training   
+    domain_discriminator                     : method to use for domain discriminator
+    discriminator_lr                         : learning rate of discriminator
+    target_representer_lr                    : learning rate in training target data
+    discriminator_per_representer_iterations : iterations for discriminator training according to representer training 
+    batch_size                               : number of samples each batch consist of
+    epochs                                   : number of epochs that model will be trained for
+    target_dim                               : dimension of  target data
+    target_nchannels                         : number of channels in target data
+    source_dim                               : dimension of source data
+    source_nchannels                         : number of channels in source data
+    output_directory                         : directory to save output models
     """
 
     assert algorithm in ["adda", "wadda"], "Invalid choice of algorithm"
