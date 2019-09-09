@@ -231,7 +231,7 @@ class AdaPy():
     return self.__source_data
 
 
-  @target_data.setter
+  @source_data.setter
   def source_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid source domain directory"
