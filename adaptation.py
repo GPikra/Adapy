@@ -9,7 +9,7 @@ import keras.optimizers as o
 from keras.models import clone_model, Model
 
 
-from batch_generator import DataGenerator
+from batch_generator import BatchGenerator
 
 class AdaPy():
 
