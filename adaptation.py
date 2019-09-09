@@ -116,7 +116,7 @@ class AdaPy():
     return domain_discriminator
 
   #TODO: Xtarget, Xsource, handle arguments
-  def fit(self, Xtarget, Xsource, epochs=self.__epochs):
+  def fit(self, Xtarget, Xsource, epochs):
     #TODO:add argument description
     """
     Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in
