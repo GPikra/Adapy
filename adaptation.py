@@ -23,6 +23,11 @@ class AdaPy():
    target_representer_lr = 0.0002,
    discriminator_per_representer_iterations = 10,
    batch_size = 32,
+   epochs = 10,
+   target_dim = (25,25),
+   target_nchannels = 3,
+   source_dim = (65,65),
+   source_nchannels = 3,
    output_directory = "Models/"
    ):
     """
@@ -41,7 +46,12 @@ class AdaPy():
     self.__latent_dimensions = source_representer.output_shape
     self.__shape = source_representer.input_shape
     self.__nlabels = source_classifier.output_shape
+    self.__target_data_dimension = target_dim
+    self.__number_of_target_data_channels = target_nchannels
+    self.__source_data_dimension = source_dim
+    self.__number_of_source_data_channels = source_nchannels
     self.__batch_size = batch_size
+    self.__epochs = epochs
     self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
 
     self.__algorithm = algorithm
@@ -91,12 +101,18 @@ class AdaPy():
     return domain_discriminator
 
   #TODO: Xtarget, Xsource, handle arguments
-  def fit(self, Xtarget, Xsource, epochs=self.__epochs,):
-    #TODO:add argument desctiption
+  def fit(self, Xtarget, Xsource, epochs=self.__epochs):
+    #TODO:add argument description
+    """
+    Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in
+    Xsource : numpy array of source data or absolute/relative path of the folder, where source data files exist in
+    epochs  : number of epochs that model will be trained for
+    """
+
     self.target_data = Xtarget
     self.source_data = Xsource
     if self.__algorithm == 'adda':
-      if isinstance(self.target_data, np.ndarray):
+      if isinstance(self.target_data, BatchGenerator_Numpy):
         source_label = np.ones((self.__batch_size, 1))
         target_label = np.zeros((self.__batch_size, 1))
 
@@ -115,7 +131,6 @@ class AdaPy():
       
       if isinstance(self.target_data, BatchGenerator):
         #TODO: Add Batchgenerator training functionality
-
         pass
 
   @property
@@ -142,11 +157,28 @@ class AdaPy():
   def batch_size(self):
     return self.__batch_size
   
-
   @batch_size.setter
   def batch_size(self, value):
     # assert (value > 0) and (value < self.)
     self.__batch_size = value
+
+  @property
+  def epochs(self):
+    return self.__epochs
+  
+  @epochs.setter
+  def epochs(self, value):
+    assert (value > 0) and isinstance(value, int), "epochs must be a positive integer" 
+    self.__epochs = value
+
+  @property
+  def shuffle(self):
+    return self.__shuffle
+  
+  @shuffle.setter
+  def shuffle(self, value):
+    assert isinstance(value, bool), "shuffle must be boolean"
+    self.__shuffle = value
 
   #TODO:add description
   @property
@@ -226,12 +258,13 @@ class AdaPy():
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
       #TODO: add arguments to BatchGenerator
-      self.__target_generator = BatchGenerator()
+      self.__target_generator = BatchGenerator(value, self.__batch_size, self.__target_data_dimension, 
+                                                self.__number_of_target_data_channels, self.__nlabels, self.__shuffle, False)
 
     if isinstance(value, np.ndarray):
       assert value.shape == self.__shape, "Invalid target domain dimensions"
       #TODO: add arguments to BatchGenerator_Numpy
-      self.__target_data = BatchGenerator_Numpy(value)
+      self.__target_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
 
 
   @property
@@ -244,9 +277,10 @@ class AdaPy():
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid source domain directory"
       #TODO: add arguments to BatchGenerator
-      self.__source_generator = BatchGenerator()
-    #TODO: Batchgenerator_Numpy
+      self.__source_generator = BatchGenerator(value,self.__batch_size, self.__source_data_dimension, 
+                                                self.__number_of_source_data_channels, self.__nlabels, self.__shuffle)
+
     if isinstance(value, np.ndarray):
       assert value.shape == self.__shape, "Invalid source domain dimensions"
       #TODO: add arguments to BatchGenerator_Numpy
-      self.__source_data = BatchGenerator_Numpy(value)
+      self.__source_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
