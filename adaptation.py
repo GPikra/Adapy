@@ -9,7 +9,7 @@ import keras.optimizers as o
 from keras.models import clone_model, Model
 
 
-from batch_generator import BatchGenerator
+from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 class AdaPy():
 
@@ -112,11 +112,7 @@ class AdaPy():
             self.__domain_discriminator.train_on_batch(target_latent, target_label)
             self.__domain_discriminator.train_on_batch(source_latent, source_label)
             self.__train_target.train_on_batch(target_data, source_label)
-              
-        
-                  
-
-
+      
       if isinstance(self.target_data, BatchGenerator):
         #TODO: Add Batchgenerator training functionality
 
@@ -229,11 +225,13 @@ class AdaPy():
   def target_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
+      #TODO: add arguments to BatchGenerator
       self.__target_generator = BatchGenerator()
 
     if isinstance(value, np.ndarray):
       assert value.shape == self.__shape, "Invalid target domain dimensions"
-      self.__target_data = value
+      #TODO: add arguments to BatchGenerator_Numpy
+      self.__target_data = BatchGenerator_Numpy(value)
 
 
   @property
@@ -245,8 +243,10 @@ class AdaPy():
   def source_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid source domain directory"
+      #TODO: add arguments to BatchGenerator
       self.__source_generator = BatchGenerator()
     #TODO: Batchgenerator_Numpy
     if isinstance(value, np.ndarray):
       assert value.shape == self.__shape, "Invalid source domain dimensions"
-      self.__source_data = value
+      #TODO: add arguments to BatchGenerator_Numpy
+      self.__source_data = BatchGenerator_Numpy(value)
