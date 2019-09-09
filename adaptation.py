@@ -95,9 +95,6 @@ class AdaPy():
       if isinstance(self.target_data, np.ndarray):
         source_label = np.ones((self__batch_size, 1))
         target_label = np.zeros((self__batch_size, 1))
-          
-        self.__domain_discriminator.summary()
-        self.self.__train_target.summary()
 
         for epoch in range(epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
