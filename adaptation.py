@@ -98,10 +98,10 @@ class AdaPy():
 
         for epoch in range(epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
-            target_data = X_train.get_batch()
-            source_data = X_source.get_batch()
+            target_data = self.target_data.get_batch()
+            source_data = self.source_data.get_batch()
             #TODO:issue Tensorboard   
-            target_latent = self.target.predict(target_data)
+            target_latent = self.__target_representer.predict(target_data)
 
             d_loss_target = self.__domain_discriminator.train_on_batch(target_latent, target_label)
             source_latent = self.__source_representer.predict(source_data)   
