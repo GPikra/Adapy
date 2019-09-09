@@ -21,7 +21,8 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0002,
-   discriminator_per_representer_iterations = 10
+   discriminator_per_representer_iterations = 10,
+   batch_size = 32
    ):
     """
     #TODO:Add argument descriptions
@@ -96,7 +97,7 @@ class AdaPy():
         source_label = np.ones((self.__batch_size, 1))
         target_label = np.zeros((self.__batch_size, 1))
 
-        for epoch in range(epochs):
+        for _ in range(epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
             target_data = self.target_data.get_batch()
             source_data = self.source_data.get_batch()
@@ -104,10 +105,9 @@ class AdaPy():
             target_latent = self.__target_representer.predict(target_data)
             source_latent = self.__source_representer.predict(source_data)   
 
-        
+            #TODO:Handle source batch differently?
             self.__domain_discriminator.train_on_batch(target_latent, target_label)
             self.__domain_discriminator.train_on_batch(source_latent, source_label)
-          
             self.__train_target.train_on_batch(target_data, source_label)
               
         
