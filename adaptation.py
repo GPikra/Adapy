@@ -22,7 +22,8 @@ class AdaPy():
    discriminator_lr = 0.001,
    target_representer_lr = 0.0002,
    discriminator_per_representer_iterations = 10,
-   batch_size = 32
+   batch_size = 32,
+   output_directory = "Models/"
    ):
     """
     #TODO:Add argument descriptions
@@ -31,6 +32,8 @@ class AdaPy():
     assert algorithm in ["adda", "wadda"], "Invalid choice of algorithm"
     assert isinstance(source_representer, K.engine.training.Model) and isinstance(source_classifier, K.engine.training.Model), \
     "Provide keras models for source encoder and classifier"
+
+    self.__output_directory = output_directory
 
     self.__discriminator_learning_rate = discriminator_lr
     self.__target_representer_learning_rate = target_representer_lr
@@ -178,7 +181,14 @@ class AdaPy():
   def input_shape(self):
     return self.__shape[1:]
 
+  @property
+  def output_directory(self):
+    return self.__output_directory
 
+  @output_directory.setter
+  def output_directory(self, value):
+    assert isinstance(value, str) and os.path.exists(value), "Provide a valid output directory for model storage"
+    self.__output_directory = value
 
   @property
   def source_classifier(self):
