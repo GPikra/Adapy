@@ -102,14 +102,13 @@ class AdaPy():
             source_data = self.source_data.get_batch()
             #TODO:issue Tensorboard   
             target_latent = self.__target_representer.predict(target_data)
-
-            d_loss_target = self.__domain_discriminator.train_on_batch(target_latent, target_label)
             source_latent = self.__source_representer.predict(source_data)   
 
-            d_loss_source = self.__domain_discriminator.train_on_batch(source_latent, source_label)
+        
+            self.__domain_discriminator.train_on_batch(target_latent, target_label)
+            self.__domain_discriminator.train_on_batch(source_latent, source_label)
           
-
-            target_loss = self.__train_target.train_on_batch(target_data, source_label)
+            self.__train_target.train_on_batch(target_data, source_label)
               
         
                   
