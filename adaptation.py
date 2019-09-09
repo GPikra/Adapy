@@ -21,6 +21,7 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0002,
+   discriminator_per_representer_iterations = 10
    ):
     """
     #TODO:Add argument descriptions
@@ -37,6 +38,7 @@ class AdaPy():
     self.__shape = source_representer.input_shape
     self.__nlabels = source_classifier.output_shape
     self.__batch_size = batch_size
+    self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
 
     self.__algorithm = algorithm
 
@@ -155,6 +157,15 @@ class AdaPy():
     assert (value > 0) and (value < self.)
     self.__batch_size = value
 
+  #TODO:add description
+  @property
+  def dpr(self):
+    return self.__discriminator_per_representer_iterations
+
+  @dpr.setter
+  def dpr(self,value):
+    assert value >= 1, "dpr must be >= 1"
+    self.__discriminator_per_representer_iterations = value
 
   @property
   def domain_discriminator(self):
@@ -222,7 +233,7 @@ class AdaPy():
       assert value.shape == self.__shape, "Invalid target domain dimensions"
       self.__target_data = value
 
-# ----------------- Source ----------------------- #
+
   @property
   def source_data(self):
     return self.__source_data
