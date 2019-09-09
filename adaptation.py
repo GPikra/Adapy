@@ -100,11 +100,8 @@ class AdaPy():
         X_train = BatchGenerator_Numpy(self.__target_data, self.__batch_size)
         X_source = BatchGenerator_Numpy(self.__source_data, self.__batch_size)
 
-        for epoch in range(1,epochs):
-          discriminator_iterations = 10
-          if epoch == 1:
-            discriminator_iterations = 25
-          for _ in range(discriminator_iterations):
+        for epoch in range(epochs):
+          for _ in range(self.__discriminator_per_representer_iterations):
             target_data = X_train.get_batch()
             source_data = X_source.get_batch()
             #TODO:issue Tensorboard   
