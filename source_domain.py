@@ -26,8 +26,9 @@ path = '/home/demokritoscil/Desktop/dftimages_L'
 # print(new[0])
 # print(list_of_data_names[0])
 
-genarate_batches = BatchGenerator(path, batch_size=128, dimension=(159,75), nchannels=4,
-                 nclasses=51, is_labeled=False)
-one_batch_X  = genarate_batches.__getitem__()
-print(one_batch_X.shape)
-
+# genarate_batches = BatchGenerator(path, batch_size=128, dimension=(159,75), nchannels=4,
+#                  nclasses=51, is_labeled=False)
+# one_batch_X  = genarate_batches.__getitem__()
+# print(one_batch_X.shape)
+a=np.array([1,2,3,4,5])
+print(a.shape,a.shape[0])

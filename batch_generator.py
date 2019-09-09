@@ -35,7 +35,7 @@ class BatchGenerator(keras.utils.Sequence):
     self.on_epoch_end()
 
     
-  def __getitem__(self, index=-1):
+  def __getitem__(self, index):
     """
     Generate one batch of data
     """
@@ -71,14 +71,31 @@ class BatchGenerator(keras.utils.Sequence):
       X[i], y[i] = read_image(filename, self.__labels, self.__is_labeled)
     return X, y
 
+  def get_batch(self, index=-1):
+    return self.__getitem__(index)
+
 
 class BatchGenerator_Numpy():
 
-  def __init__(self, data, batch_size):
+  def __init__(self, data, batch_size, shuffle=True):
     assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
     self.__data = data
     self.__batch_size = batch_size
+    self.__shuffle = shuffle
+    self.__datasetSize = self.__data.shape[0]
 
-  def __getitem__(self):
-    idx = np.random.randint(0, self__data.shape[0], self.__batch_size)
-    return self.__data[idx]
+  def __getitem__(self, index):
+    if index == -1:
+      upto = (self.__datasetSize//self.__batch_size)-1
+      index = random.randint(0, upto)
+
+    self.__indices = np.arange(self.__datasetSize)
+    if self.__shuffle == True:
+      np.random.shuffle(self.__indices)
+
+    indices = self.__indices[index*self.__batch_size:(index+1)*self.__batch_size] 
+    X = [self.__data[i] for i in indices]
+    return X
+
+  def get_batch(self, index=-1):
+    return self.__getitem__(index)
