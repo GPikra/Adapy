@@ -89,6 +89,8 @@ class AdaPy():
   #TODO: Xtarget, Xsource, handle arguments
   def fit(self, Xtarget, Xsource, epochs=self.__epochs,):
     #TODO:add argument desctiption
+    self.target_data = Xtarget
+    self.source_data = Xsource
     if self.__algorithm == 'adda':
       if isinstance(self.target_data, np.ndarray):
         source_label = np.ones((self__batch_size, 1))
@@ -96,9 +98,6 @@ class AdaPy():
           
         self.__domain_discriminator.summary()
         self.self.__train_target.summary()
-
-        X_train = BatchGenerator_Numpy(self.__target_data, self.__batch_size)
-        X_source = BatchGenerator_Numpy(self.__source_data, self.__batch_size)
 
         for epoch in range(epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
