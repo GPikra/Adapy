@@ -24,10 +24,6 @@ class AdaPy():
    discriminator_per_representer_iterations = 10,
    batch_size = 32,
    epochs = 10,
-   target_dim = (25,25),
-   target_nchannels = 3,
-   source_dim = (65,65),
-   source_nchannels = 3,
    output_directory = "Models/"
    ):
     """
@@ -42,10 +38,6 @@ class AdaPy():
     discriminator_per_representer_iterations : iterations for discriminator training according to representer training 
     batch_size                               : number of samples each batch consist of
     epochs                                   : number of epochs that model will be trained for
-    target_dim                               : dimension of  target data
-    target_nchannels                         : number of channels in target data
-    source_dim                               : dimension of source data
-    source_nchannels                         : number of channels in source data
     output_directory                         : directory to save output models
     """
 
@@ -61,10 +53,6 @@ class AdaPy():
     self.__latent_dimensions = source_representer.output_shape
     self.__shape = source_representer.input_shape
     self.__nlabels = source_classifier.output_shape
-    self.__target_data_dimension = target_dim
-    self.__number_of_target_data_channels = target_nchannels
-    self.__source_data_dimension = source_dim
-    self.__number_of_source_data_channels = source_nchannels
     self.__batch_size = batch_size
     self.__epochs = epochs
     self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
@@ -124,11 +112,13 @@ class AdaPy():
     return domain_discriminator
 
   #TODO: Xtarget, Xsource, handle arguments
-  def fit(self, Xtarget, Xsource, epochs):
+  def fit(self, Xtarget, Xsource):
     #TODO:add argument description
     """
     Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in
+
     Xsource : numpy array of source data or absolute/relative path of the folder, where source data files exist in
+
     epochs  : number of epochs that model will be trained for
     """
 
@@ -139,7 +129,7 @@ class AdaPy():
         source_label = np.ones((self.__batch_size, 1))
         target_label = np.zeros((self.__batch_size, 1))
 
-        for _ in range(epochs):
+        for _ in range(self.__epochs):
           for _ in range(self.__discriminator_per_representer_iterations):
             target_data = self.target_data.get_batch()
             source_data = self.source_data.get_batch()
@@ -281,11 +271,11 @@ class AdaPy():
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
       #TODO: add arguments to BatchGenerator
-      self.__target_generator = BatchGenerator(value, self.__batch_size, self.__target_data_dimension, 
-                                                self.__number_of_target_data_channels, self.__nlabels, self.__shuffle, False)
+      self.__target_generator = BatchGenerator(value, self.__batch_size, self.input_shape[:-1], 
+                                                self.input_shape[-1], self.__nlabels, self.__shuffle, False)
 
     if isinstance(value, np.ndarray):
-      assert value.shape == self.__shape, "Invalid target domain dimensions"
+      assert value.shape[1:] == self.__shape[1:-1], "Invalid target domain dimensions"
       #TODO: add arguments to BatchGenerator_Numpy
       self.__target_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
 
@@ -300,10 +290,10 @@ class AdaPy():
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid source domain directory"
       #TODO: add arguments to BatchGenerator
-      self.__source_generator = BatchGenerator(value,self.__batch_size, self.__source_data_dimension, 
-                                                self.__number_of_source_data_channels, self.__nlabels, self.__shuffle)
+      self.__source_generator = BatchGenerator(value,self.__batch_size, self.input_shape[:-1], 
+                                                self.input_shape[-1], self.__nlabels, self.__shuffle)
 
     if isinstance(value, np.ndarray):
-      assert value.shape == self.__shape, "Invalid source domain dimensions"
+      assert value.shape[1:] == self.__shape[1:-1], "Invalid source domain dimensions"
       #TODO: add arguments to BatchGenerator_Numpy
       self.__source_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
