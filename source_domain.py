@@ -1,13 +1,13 @@
-from __future__ import print_function
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-import keras
-import numpy as np
-from keras.models import save_model, load_model
-from batch_generator import BatchGenerator
-import os
-import imageio
-from auxilliary import crawl_directory
+# from __future__ import print_function
+# import warnings
+# warnings.simplefilter(action='ignore', category=FutureWarning)
+# import keras
+# import numpy as np
+# from keras.models import save_model, load_model
+# from batch_generator import BatchGenerator
+# import os
+# import imageio
+# from auxilliary import crawl_directory
 
 path = '/home/demokritoscil/Desktop/dftimages_L'
 # new = crawl_directory(path)
@@ -30,5 +30,18 @@ path = '/home/demokritoscil/Desktop/dftimages_L'
 #                  nclasses=51, is_labeled=False)
 # one_batch_X  = genarate_batches.__getitem__()
 # print(one_batch_X.shape)
-a=np.array([1,2,3,4,5])
-print(a.shape,a.shape[0])
+
+import warnings
+warnings.simplefilter(action='ignore')#, category=FutureWarning)
+import os
+import numpy as np
+from keras.datasets import mnist
+from keras.models import load_model
+import keras as K
+from adaptation import AdaPy
+
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+source_representer = load_model('M_s.h5')
+source_classifier = load_model('Class.h5')
+adda = AdaPy(source_representer,source_classifier)
