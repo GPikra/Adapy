@@ -130,6 +130,7 @@ class AdaPy():
         source_label = np.ones((self.__batch_size, 1))
         target_label = np.zeros((self.__batch_size, 1))
         self.__discriminator_per_representer_iterations_for0=25
+        #TODO:make function for dd training
         for _ in range(self.__discriminator_per_representer_iterations_for0):
           target_data = self.target_data.get_batch()
           source_data = self.source_data.get_batch()

@@ -101,9 +101,8 @@ class BatchGenerator_Numpy():
     if self.__shuffle == True:
       np.random.shuffle(self.__indices)
 
-    indices = self.__indices[index*self.__batch_size:(index+1)*self.__batch_size] 
-    X = [self.__data[i] for i in indices]
-    return X
+    indices = self.__indices[index*self.__batch_size:(index+1)*self.__batch_size]
+    return np.array([self.__data[i] for i in indices])
 
   def get_batch(self, index=-1):
     return self.__getitem__(index)

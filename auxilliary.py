@@ -1,14 +1,13 @@
 import os
 import imageio
+import numpy as np
+from keras.models import clone_model
 
-class BatchGenerator_numpy():
-
-  def __init__(self, data, batch_size):
-    assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
-    pass
-
-  def __get_item__(self):
-    pass
+def copy_model(model, model_name):
+  result_model = clone_model(model)
+  result_model.set_weights(model.get_weights()) 
+  result_model.name = model_name
+  return result_model
 
 def crawl_directory(dir): 
   subdirs = [x[0] for x in os.walk(dir)]                                                                                               
@@ -33,6 +32,10 @@ def read_image(path, mapped_labels, is_labeled=True):
   return read_image, -1
 
 def map_labels(directories):
+  """
+  Indexing of labels from strings to integers
+  """
+
   labels = set()
   for path in directories:
     labels.add(get_class(path))
@@ -42,4 +45,23 @@ def map_labels(directories):
     mapped_labels[label] = i
     i+=1
   return mapped_labels
+
+def one_hot(labels, data_labels):
+    labels = list(set(labels))
+    labels.sort()
+    a = {}
+    for i , v in enumerate(labels):
+        a[v] = i  
+    A = np.zeros((data_labels.shape[0],len(labels)))
+    for i in range(A.shape[0]):
+        v = data_labels[i]
+        if v not in a.keys(): pass
+        else: A[i][a[v]] = 1
+    return A
+
+def hot_one(labels, data_labels):
+    aux = []
+    for i in data_labels:
+        aux.append(labels[np.argmax(i)])
+    return aux
 
