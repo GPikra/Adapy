@@ -73,30 +73,38 @@ class AdaPy():
 
     self.__source_representer = clone_model(source_representer)
     self.__source_representer.set_weights(source_representer.get_weights()) 
+    self.__source_representer.name = "SourceRepresenter"
 
     self.__target_representer = clone_model(source_representer)
     self.__target_representer.set_weights(source_representer.get_weights()) 
+    self.__target_representer.name = "TargetRepresenter"
 
     if domain_discriminator == "linear":
       self.__domain_discriminator = self.__build_domain_discriminator()
+      self.__domain_discriminator.name = "DomainDiscriminator"
     else:
       assert isinstance(domain_discriminator, K.engine.training.Model), "Provide keras model for domain discriminator"
       assert domain_discriminator.output_shape == self.__nlabels, "Domain discriminator must be a binary classifier"
       assert domain_discriminator.input_shape == self.__latent_dimensions, "Domain discriminator input dimensionality was invalid"
       self.__domain_discriminator = domain_discriminator
+      if self.__domain_discriminator.name != "DomainDiscriminator":
+        self.__domain_discriminator.name = "DomainDiscriminator"
 
     self.__source_classifier = clone_model(source_classifier)
     self.__source_classifier.set_weights(source_classifier.get_weights()) 
+    self.__source_classifier.name = "Classifier"
 
     representer_input = l.Input(self.input_shape)
 
     source_representer_output = self.__source_representer(representer_input)
     source_classifier = self.__source_classifier(source_representer_output)
     self.__source_model = Model(representer_input, source_classifier)
+    self.__source_model.name = "SourceModel"
 
     target_representer_output = self.__target_representer(representer_input)
     domain_discriminator_o_target_representer = self.__domain_discriminator(target_representer_output)
     self.__train_target = Model(representer_input, domain_discriminator_o_target_representer)
+    self.__train_target.name = "TrainTarget"
 
     self.compile_models()
 
