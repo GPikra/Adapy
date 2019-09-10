@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: ADAPY
+Version: 0.1
+Summary: Domain Adaptation package
+Home-page: https://gitlab.com/cillab/adapy/
+Author: George Pikramenos
+Author-email: deepak.kumar.iet@gmail.com
+License: UNKNOWN
+Description: You can pip install our library
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown

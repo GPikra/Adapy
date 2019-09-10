@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!python
 import warnings
 warnings.simplefilter(action='ignore')#, category=FutureWarning)
 import os
