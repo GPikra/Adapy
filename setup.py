@@ -6,23 +6,23 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
 
-     name='ADAPY',  
+     name='adapy',  
 
      version='0.1',
 
      scripts=['adaptation.py','auxilliary.py','batch_generator.py'] ,
 
-     author="George Pikramenos",
+     author="George Pikramenos, Eleanna Vali",
 
-     author_email="deepak.kumar.iet@gmail.com",
+     author_email="gpik@di.uoa.gr",
 
-     description="Domain Adaptation package",
+     description="Package for Adversarial Domain Adaptation",
 
      long_description=long_description,
 
    long_description_content_type="text/markdown",
 
-     url="https://gitlab.com/cillab/adapy/",
+     url="git@gitlab.com:cillab/adapy.git",
 
      packages=setuptools.find_packages(),
 
