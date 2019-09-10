@@ -1,6 +1,5 @@
 *.txt
 
 test.py
-source.h5
-M_s.h5
-Class.h5
+
+*.h5
