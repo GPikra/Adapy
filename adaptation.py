@@ -11,7 +11,7 @@ import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
 
-from auxilliary import copy_model
+from auxilliary import copy_model, WeightClip
 from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 class AdaPy():
@@ -28,7 +28,8 @@ class AdaPy():
    discriminator_per_representer_iterations_for0 = 25,
    batch_size = 256,
    epochs = 10,
-   output_directory = "Models/"
+   output_directory = "Models/",
+   lipschitz = "clip"
    ):
     """
     #TODO:Add argument descriptions
@@ -117,6 +118,13 @@ class AdaPy():
         self.__domain_discriminator = domain_discriminator
         if self.__domain_discriminator.name != "DomainDiscriminator":
           self.__domain_discriminator.name = "DomainDiscriminator"
+    elif self.__algorithm == "wadda":
+      if domain_discriminator == "linear":
+        latent_representation = l.Input(shape=(self.__latent_dimensions,))
+        classifier = l.Dense(1, activation = 'linear', kernel_initializer='he_normal',
+            W_constraint = WeightClip(0.05))
+        self.__domain_discriminator = Model(latent_representation, classifier)
+        self.__domain_discriminator.name = "DomainDiscriminator"
     
   def __train_domain_discriminator(self, iterations, target_label, source_label):
     for _ in range(iterations):
@@ -128,7 +136,7 @@ class AdaPy():
       self.__domain_discriminator.train_on_batch(source_latent, source_label)
 
 
-  def fit(self, Xtarget, Xsource, iterations=self.__epochs):
+  def fit(self, Xtarget, Xsource, iterations=None):
     """
     Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in 
 
@@ -137,6 +145,8 @@ class AdaPy():
     epochs  : number of epochs that model will be trained for
     """
 
+    if iterations is None: iterations = self.__epochs
+    
     self.target_data = Xtarget
     self.source_data = Xsource
     if self.__algorithm == 'adda':

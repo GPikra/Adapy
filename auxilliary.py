@@ -2,6 +2,21 @@ import os
 import imageio
 import numpy as np
 from keras.models import clone_model
+import keras.backend as K
+from keras.constraints import Constraint
+
+class WeightClip(Constraint):
+  
+    def __init__(self, clip_parameter=0.01):
+        self.clip_parameter = clip_parameter
+
+    def __call__(self, p):
+        return K.clip(p, -self.clip_parameter, self.clip_parameter)
+
+    def get_config(self):
+        return {'name': self.__class__.__name__,
+                'clip_parameter': self.clip_parameter}
+
 
 def copy_model(model, model_name):
   "Safe copy keras model function"
@@ -10,6 +25,7 @@ def copy_model(model, model_name):
   result_model.set_weights(model.get_weights()) 
   result_model.name = model_name
   return result_model
+
 
 def crawl_directory(dir): 
   """
@@ -26,6 +42,7 @@ def crawl_directory(dir):
   #TODO: Make generator -> problems: cannot have dataSize , cannot have indexing in labels 
   yield tree
 
+
 def get_class(path):
   """
   Gets the class of a given file (name of the subdirectory it is in)
@@ -34,12 +51,14 @@ def get_class(path):
   absolute_subdirectory = path[:path.rfind("/")]
   return absolute_subdirectory[absolute_subdirectory.rfind("/")+1:]
 
+
 def read_image(path, mapped_labels, is_labeled=True):
   read_image = imageio.imread(path)
   if is_labeled:
     label = get_class(path)
     return read_image, mapped_labels[label]
   return read_image, -1
+
 
 def map_labels(directories):
   """
@@ -55,6 +74,7 @@ def map_labels(directories):
     mapped_labels[label] = i
     i+=1
   return mapped_labels
+
 
 def one_hot(labels, data_labels):
   """
@@ -81,4 +101,3 @@ def hot_one(labels, data_labels):
     for i in data_labels:
         aux.append(labels[np.argmax(i)])
     return aux
-
