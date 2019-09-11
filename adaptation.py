@@ -55,9 +55,7 @@ class AdaPy():
     #TODO: Add assertions for all arguments
 
     self.__output_directory = output_directory
-    
     self.__algorithm = algorithm
-
     self.__discriminator_learning_rate = discriminator_lr
     self.__target_representer_learning_rate = target_representer_lr
     self.__weight_clip_threshold = weight_clip_threshold
@@ -66,33 +64,12 @@ class AdaPy():
     self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
     self.__discriminator_per_representer_iterations_for0 = discriminator_per_representer_iterations_for0
     self.__batch_size = batch_size
-
     self.__latent_dimensions = source_representer.output_shape[1]
     self.__shape = source_representer.input_shape
     self.__nlabels = source_classifier.output_shape
-    
-    self.__source_representer = copy_model(source_representer, "SourceRepresenter")
-    self.__target_representer = copy_model(source_representer, "TargetRepresenter")
-    self.__source_classifier = copy_model(source_classifier, "Classifier")
-    self.__build_domain_discriminator(domain_discriminator)
 
-    representer_input = l.Input(self.input_shape)
-
-    source_representer_output = self.__source_representer(representer_input)
-    source_classifier = self.__source_classifier(source_representer_output)
-    self.__source_model = Model(representer_input, source_classifier)
-    self.__source_model.name = "SourceModel"
-
-    target_representer_output = self.__target_representer(representer_input)
-    target_classifier = self.__source_classifier(target_representer_output)
-    self.__target_model = Model(representer_input, target_classifier)
-    self.__target_model.name = "TargetModel"
-
-    target_representer_output = self.__target_representer(representer_input)
-    domain_discriminator_o_target_representer = self.__domain_discriminator(target_representer_output)
-    self.__train_target = Model(representer_input, domain_discriminator_o_target_representer)
-    self.__train_target.name = "TrainTarget"
-
+    self.__initialize_models(source_representer, source_classifier, domain_discriminator)
+    self.__define_models_for_training_and_inference()
     self.compile_models()
 
   def compile_models(self):
@@ -148,6 +125,32 @@ class AdaPy():
       #TODO:Handle source batch differently?
       self.__domain_discriminator.train_on_batch(target_latent, target_label)
       self.__domain_discriminator.train_on_batch(source_latent, source_label)
+
+
+  def __initialize_models(self, source_representer, source_classifier, domain_discriminator):
+    self.__source_representer = copy_model(source_representer, "SourceRepresenter")
+    self.__target_representer = copy_model(source_representer, "TargetRepresenter")
+    self.__source_classifier = copy_model(source_classifier, "Classifier")
+    self.__build_domain_discriminator(domain_discriminator)
+
+
+  def __define_models_for_training_and_inference(self):
+    representer_input = l.Input(self.input_shape)
+
+    source_representer_output = self.__source_representer(representer_input)
+    source_classifier = self.__source_classifier(source_representer_output)
+    self.__source_model = Model(representer_input, source_classifier)
+    self.__source_model.name = "SourceModel"
+
+    target_representer_output = self.__target_representer(representer_input)
+    target_classifier = self.__source_classifier(target_representer_output)
+    self.__target_model = Model(representer_input, target_classifier)
+    self.__target_model.name = "TargetModel"
+
+    target_representer_output = self.__target_representer(representer_input)
+    domain_discriminator_o_target_representer = self.__domain_discriminator(target_representer_output)
+    self.__train_target = Model(representer_input, domain_discriminator_o_target_representer)
+    self.__train_target.name = "TrainTarget"
 
 
   def fit(self, Xtarget, Xsource, iterations=None):
@@ -376,4 +379,3 @@ class AdaPy():
     if isinstance(value, np.ndarray):
       assert value.shape[1:] == self.__shape[1:], "Invalid source domain dimensions"
       self.__source_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
-      
