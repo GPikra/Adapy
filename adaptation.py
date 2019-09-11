@@ -200,9 +200,13 @@ class AdaPy():
     assert isinstance(value, bool), "shuffle must be boolean"
     self.__shuffle = value
 
-  #TODO:add description
   @property
   def dpr(self):
+    """
+    # of iterations that the domain discriminator will be trained on 
+    for every iteration the target representer is trained on
+    """
+
     return self.__discriminator_per_representer_iterations
 
   @dpr.setter
@@ -212,6 +216,11 @@ class AdaPy():
 
   @property
   def dpr0(self):
+    """
+    # of iterations that the domain discriminator will be trained on 
+    before adversarial training starts
+    """
+
     return self.__discriminator_per_representer_iterations_for0
 
   @dpr.setter

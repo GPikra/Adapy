@@ -4,12 +4,18 @@ import numpy as np
 from keras.models import clone_model
 
 def copy_model(model, model_name):
+  "Safe copy keras model function"
+
   result_model = clone_model(model)
   result_model.set_weights(model.get_weights()) 
   result_model.name = model_name
   return result_model
 
 def crawl_directory(dir): 
+  """
+  Function for listing all files in the directory tree with root (input):"dir"
+  """
+
   subdirs = [x[0] for x in os.walk(dir)]                                                                                               
   tree = []                                                                                                            
   for subdir in subdirs:                                                                                            
@@ -21,6 +27,10 @@ def crawl_directory(dir):
   yield tree
 
 def get_class(path):
+  """
+  Gets the class of a given file (name of the subdirectory it is in)
+  """
+
   absolute_subdirectory = path[:path.rfind("/")]
   return absolute_subdirectory[absolute_subdirectory.rfind("/")+1:]
 
@@ -47,17 +57,24 @@ def map_labels(directories):
   return mapped_labels
 
 def one_hot(labels, data_labels):
-    labels = list(set(labels))
-    labels.sort()
-    a = {}
-    for i , v in enumerate(labels):
-        a[v] = i  
-    A = np.zeros((data_labels.shape[0],len(labels)))
-    for i in range(A.shape[0]):
-        v = data_labels[i]
-        if v not in a.keys(): pass
-        else: A[i][a[v]] = 1
-    return A
+  """
+  Converts labels to one-hot encodings
+
+    - labels: list, list of labels to attempt to convert
+    - data_labels: list, list of labels in dataset
+  """
+
+  labels = list(set(labels))
+  labels.sort()
+  a = {}
+  for i , v in enumerate(labels):
+      a[v] = i  
+  A = np.zeros((data_labels.shape[0],len(labels)))
+  for i in range(A.shape[0]):
+      v = data_labels[i]
+      if v not in a.keys(): pass
+      else: A[i][a[v]] = 1
+  return A
 
 def hot_one(labels, data_labels):
     aux = []
