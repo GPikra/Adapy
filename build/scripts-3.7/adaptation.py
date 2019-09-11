@@ -88,6 +88,10 @@ class AdaPy():
     self.compile_models()
 
   def compile_models(self):
+    """
+    Method to compile all models of object
+    """
+    
     if self.__algorithm == "adda":
       self.__domain_discriminator.trainable = True
       self.__domain_discriminator.compile(loss="binary_crossentropy", optimizer = o.Adam(lr=self.__discriminator_learning_rate))
