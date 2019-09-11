@@ -6,16 +6,37 @@ import keras.backend as K
 from keras.constraints import Constraint
 
 class WeightClip(Constraint):
+  """
+  Keras weight constraint for clipping weights. Used for enforcing Lipschitz condition.
+  """
+
+  def __init__(self, clip_parameter=0.01):
+      self.clip_parameter = clip_parameter
+
+  def __call__(self, p):
+      return K.clip(p, -self.clip_parameter, self.clip_parameter)
+
+  def get_config(self):
+      return {'name': self.__class__.__name__,
+              'clip_parameter': self.clip_parameter}
+
+
+def entropy_loss(yTrue,yPred):
+  """
+  Entropy loss function for keras.
+  """
+
+  return -1*K.mean(yPred*K.log(yPred))
+
+
+def wasserstein_loss(y_true, y_pred):
+  """
+  Keras loss function for Wasserstein Domain Critic.
   
-    def __init__(self, clip_parameter=0.01):
-        self.clip_parameter = clip_parameter
+  Label target samples -1 and source samples 1
+  """
 
-    def __call__(self, p):
-        return K.clip(p, -self.clip_parameter, self.clip_parameter)
-
-    def get_config(self):
-        return {'name': self.__class__.__name__,
-                'clip_parameter': self.clip_parameter}
+  return -K.mean(y_true * y_pred)
 
 
 def copy_model(model, model_name):

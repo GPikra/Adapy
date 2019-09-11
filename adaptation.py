@@ -11,10 +11,26 @@ import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
 
-from auxilliary import copy_model, WeightClip
+from auxilliary import copy_model, WeightClip, wasserstein_loss
 from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 class AdaPy():
+  """
+    Simple class for adversarial domain adaptation bases on keras and tensorflow. 
+
+      Input:
+        - source_representer                       : model be trained by source data
+        - source_classifier                        : model of classifier be trained by source data
+        - index_to_label_dictionary                : specific way to index labels              #not sure what you mean
+        - algorithm                                : adda or wadda algorithm choice for training   
+        - domain_discriminator                     : method to use for domain discriminator #TODO: Add a 1-hidden layer option
+        - discriminator_lr                         : learning rate of discriminator
+        - target_representer_lr                    : learning rate in training target data
+        - discriminator_per_representer_iterations : iterations for discriminator training according to representer training 
+        - batch_size                               : number of samples each batch consist of
+        - epochs                                   : number of epochs that model will be trained for
+        - output_directory                         : directory to save output models
+    """
 
   def __init__(self,
    source_representer, 
@@ -27,28 +43,16 @@ class AdaPy():
    discriminator_per_representer_iterations = 10,
    discriminator_per_representer_iterations_for0 = 25,
    batch_size = 256,
+   weight_clip_threshold = 0.05,
    epochs = 10,
    output_directory = "Models/",
    lipschitz = "clip"
    ):
-    """
-    #TODO:Add argument descriptions
-    source_representer                       : model be trained by source data
-    source_classifier                        : model of classifier be trained by source data
-    index_to_label_dictionary                : specific way to index labels              #not sure what you mean
-    algorithm                                : adda or wadda algorithm choice for training   
-    domain_discriminator                     : method to use for domain discriminator
-    discriminator_lr                         : learning rate of discriminator
-    target_representer_lr                    : learning rate in training target data
-    discriminator_per_representer_iterations : iterations for discriminator training according to representer training 
-    batch_size                               : number of samples each batch consist of
-    epochs                                   : number of epochs that model will be trained for
-    output_directory                         : directory to save output models
-    """
 
     assert algorithm in ["adda", "wadda"], "Invalid choice of algorithm"
     assert isinstance(source_representer, K.engine.training.Model) and isinstance(source_classifier, K.engine.training.Model), \
     "Provide keras models for source encoder and classifier"
+    #TODO: Add assertions for all arguments
 
     self.__output_directory = output_directory
     
@@ -56,6 +60,7 @@ class AdaPy():
 
     self.__discriminator_learning_rate = discriminator_lr
     self.__target_representer_learning_rate = target_representer_lr
+    self.__weight_clip_threshold = weight_clip_threshold
     self.__shuffle = True
     self.__epochs = epochs
     self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
@@ -102,6 +107,13 @@ class AdaPy():
       self.__train_target.compile(loss="binary_crossentropy", optimizer = o.Adam(lr=self.__target_representer_learning_rate))
       #TODO: Possibly not 
       self.__target_model.compile(loss="categorical_crossentropy", optimizer = o.Adam(lr=self.__target_representer_learning_rate), metrics=["accuracy"])
+    if self.__algorithm == "wadda":
+      self.__domain_discriminator.trainable = True
+      self.__domain_discriminator.compile(loss=wasserstein_loss, optimizer = o.Adam(lr=self.__discriminator_learning_rate))
+      self.__domain_discriminator.trainable = False
+      self.__train_target.compile(loss=wasserstein_loss, optimizer = o.Adam(lr=self.__target_representer_learning_rate))
+      #TODO: Possibly not 
+      self.__target_model.compile(loss="categorical_crossentropy", optimizer = o.Adam(lr=self.__target_representer_learning_rate), metrics=["accuracy"])
 
 
   def __build_domain_discriminator(self, domain_discriminator):
@@ -122,10 +134,12 @@ class AdaPy():
       if domain_discriminator == "linear":
         latent_representation = l.Input(shape=(self.__latent_dimensions,))
         classifier = l.Dense(1, activation = 'linear', kernel_initializer='he_normal',
-            W_constraint = WeightClip(0.05))
+            W_constraint = WeightClip(self.__weight_clip_threshold))(latent_representation)
+        #TODO: Add a WARNING!
         self.__domain_discriminator = Model(latent_representation, classifier)
         self.__domain_discriminator.name = "DomainDiscriminator"
     
+
   def __train_domain_discriminator(self, iterations, target_label, source_label):
     for _ in range(iterations):
       #TODO:issue Tensorboard   
@@ -146,7 +160,7 @@ class AdaPy():
     """
 
     if iterations is None: iterations = self.__epochs
-    
+
     self.target_data = Xtarget
     self.source_data = Xsource
     if self.__algorithm == 'adda':
@@ -162,11 +176,25 @@ class AdaPy():
       if isinstance(self.target_data, BatchGenerator):
         #TODO: Add Batchgenerator training functionality
         pass
+        
+    if self.__algorithm == "wadda":
+      if isinstance(self.target_data, BatchGenerator_Numpy):
+        source_label = np.ones((self.__batch_size, 1))
+        target_label = np.zeros((self.__batch_size, 1))
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+        for _ in tqdm(range(iterations-1)):
+          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+        self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+      
+      if isinstance(self.target_data, BatchGenerator):
+        #TODO: Add Batchgenerator training functionality
+        pass
+      
 
   @property
   def domain_discriminator_lr(self):
     return self.__discriminator_learning_rate
-  
 
   @domain_discriminator_lr.setter
   def domain_discriminator_lr(self, value):
@@ -176,11 +204,11 @@ class AdaPy():
   @property
   def target_lr(self):
     return self.__target_representer_learning_rate
-  
 
   @target_lr.setter
   def target_lr(self, value):
     self.__target_representer_learning_rate = value
+
 
   #TODO:Issue
   @property
@@ -192,6 +220,7 @@ class AdaPy():
     # assert (value > 0) and (value < self.)
     self.__batch_size = value
 
+
   @property
   def epochs(self):
     return self.__epochs
@@ -201,6 +230,17 @@ class AdaPy():
     assert (value > 0) and isinstance(value, int), "epochs must be a positive integer" 
     self.__epochs = value
 
+
+  @property
+  def epochs(self):
+    return self.__epochs
+  
+  @epochs.setter
+  def epochs(self, value):
+    assert (value > 0) and isinstance(value, int), "epochs must be a positive integer" 
+    self.__epochs = value
+
+
   @property
   def shuffle(self):
     return self.__shuffle
@@ -209,6 +249,7 @@ class AdaPy():
   def shuffle(self, value):
     assert isinstance(value, bool), "shuffle must be boolean"
     self.__shuffle = value
+
 
   @property
   def dpr(self):
@@ -224,6 +265,7 @@ class AdaPy():
     assert value >= 1, "dpr must be >= 1"
     self.__discriminator_per_representer_iterations = value
 
+
   @property
   def dpr0(self):
     """
@@ -238,13 +280,16 @@ class AdaPy():
     assert value >= 1, "dpr must be >= 1"
     self.__discriminator_per_representer_iterations_for0 = value
 
+
   @property
   def domain_discriminator(self):
     return self.__domain_discriminator
 
+
   @property
   def target_model(self):
     return self.__target_model
+
 
   @property
   def nlabels(self):
@@ -260,6 +305,7 @@ class AdaPy():
   def input_shape(self):
     return self.__shape[1:]
 
+
   @property
   def output_directory(self):
     return self.__output_directory
@@ -268,6 +314,7 @@ class AdaPy():
   def output_directory(self, value):
     assert isinstance(value, str) and os.path.exists(value), "Provide a valid output directory for model storage"
     self.__output_directory = value
+
 
   @property
   def source_classifier(self):
@@ -303,7 +350,6 @@ class AdaPy():
   def target_data(self):
     return self.__target_data
 
-
   @target_data.setter
   def target_data(self, value):
     if isinstance(value, str):
@@ -320,7 +366,6 @@ class AdaPy():
   def source_data(self):
     return self.__source_data
 
-
   @source_data.setter
   def source_data(self, value):
     if isinstance(value, str):
@@ -331,3 +376,4 @@ class AdaPy():
     if isinstance(value, np.ndarray):
       assert value.shape[1:] == self.__shape[1:], "Invalid source domain dimensions"
       self.__source_data = BatchGenerator_Numpy(value, self.__batch_size, self.__shuffle)
+      
