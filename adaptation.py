@@ -14,6 +14,7 @@ from keras.models import Model
 from auxilliary import copy_model, WeightClip, wasserstein_loss
 from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
+
 class AdaPy():
   """
     Simple class for adversarial domain adaptation bases on keras and tensorflow. 
@@ -159,7 +160,7 @@ class AdaPy():
 
     Xsource : numpy array of source data or absolute/relative path of the folder, where source data files exist in 
 
-    epochs  : number of epochs that model will be trained for
+    iterations  : number of epochs that model will be trained for
     """
 
     if iterations is None: iterations = self.__epochs
