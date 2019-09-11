@@ -24,9 +24,10 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0001,
-   discriminator_per_representer_iterations = 10,
+   discriminator_per_representer_iterations = 1,
+   discriminator_per_representer_iterations_for0 = 1,
    batch_size = 256,
-   epochs = 10,
+   epochs = 2,
    output_directory = "Models/"
    ):
     """
@@ -56,6 +57,7 @@ class AdaPy():
     self.__shuffle = True
     self.__epochs = epochs
     self.__discriminator_per_representer_iterations = discriminator_per_representer_iterations
+    self.__discriminator_per_representer_iterations_for0 = discriminator_per_representer_iterations_for0
     self.__batch_size = batch_size
 
     self.__latent_dimensions = source_representer.output_shape[1]
@@ -87,6 +89,10 @@ class AdaPy():
     self.compile_models()
 
   def compile_models(self):
+    """
+    Method to compile all models of object
+    """
+    
     if self.__algorithm == "adda":
       self.__domain_discriminator.trainable = True
       self.__domain_discriminator.compile(loss="binary_crossentropy", optimizer = o.Adam(lr=self.__discriminator_learning_rate))
@@ -110,6 +116,15 @@ class AdaPy():
         self.__domain_discriminator = domain_discriminator
         if self.__domain_discriminator.name != "DomainDiscriminator":
           self.__domain_discriminator.name = "DomainDiscriminator"
+    
+  def __train_domain_discriminator(self, iterations, target_label, source_label):
+    for _ in range(iterations):
+      #TODO:issue Tensorboard   
+      target_latent = self.__target_representer.predict(self.target_data.get_batch())
+      source_latent = self.__source_representer.predict(self.source_data.get_batch())   
+      #TODO:Handle source batch differently?
+      self.__domain_discriminator.train_on_batch(target_latent, target_label)
+      self.__domain_discriminator.train_on_batch(source_latent, source_label)
 
 
   def fit(self, Xtarget, Xsource):
@@ -126,30 +141,12 @@ class AdaPy():
     if self.__algorithm == 'adda':
       source_label = np.ones((self.__batch_size, 1))
       target_label = np.zeros((self.__batch_size, 1))
-      self.__discriminator_per_representer_iterations_for0=25
-      #TODO:make function for dd training
-      for _ in range(self.__discriminator_per_representer_iterations_for0):
-        target_data = self.target_data.get_batch()
-        source_data = self.source_data.get_batch()
-        #TODO:issue Tensorboard   
-        target_latent = self.__target_representer.predict(target_data)
-        source_latent = self.__source_representer.predict(source_data)   
-        #TODO:Handle source batch differently?
-        self.__domain_discriminator.train_on_batch(target_latent, target_label)
-        self.__domain_discriminator.train_on_batch(source_latent, source_label)
-      for epoch in tqdm(range(self.__epochs-1)):
-        self.__train_target.train_on_batch(target_data, source_label)
-        for _ in range(self.__discriminator_per_representer_iterations):
-          target_data = self.target_data.get_batch()
-          source_data = self.source_data.get_batch()
-          #TODO:issue Tensorboard   
-          target_latent = self.__target_representer.predict(target_data)
-          source_latent = self.__source_representer.predict(source_data)   
-          #TODO:Handle source batch differently?
-          self.__domain_discriminator.train_on_batch(target_latent, target_label)
-          self.__domain_discriminator.train_on_batch(source_latent, source_label)
-      
-        
+      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      for _ in tqdm(range(self.__epochs-1)):
+        self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+
 
   @property
   def domain_discriminator_lr(self):
@@ -198,15 +195,33 @@ class AdaPy():
     assert isinstance(value, bool), "shuffle must be boolean"
     self.__shuffle = value
 
-  #TODO:add description
   @property
   def dpr(self):
+    """
+    # of iterations that the domain discriminator will be trained on 
+    for every iteration the target representer is trained on
+    """
+
     return self.__discriminator_per_representer_iterations
 
   @dpr.setter
   def dpr(self,value):
     assert value >= 1, "dpr must be >= 1"
     self.__discriminator_per_representer_iterations = value
+
+  @property
+  def dpr0(self):
+    """
+    # of iterations that the domain discriminator will be trained on 
+    before adversarial training starts
+    """
+
+    return self.__discriminator_per_representer_iterations_for0
+
+  @dpr.setter
+  def dpr0(self,value):
+    assert value >= 1, "dpr must be >= 1"
+    self.__discriminator_per_representer_iterations_for0 = value
 
   @property
   def domain_discriminator(self):
