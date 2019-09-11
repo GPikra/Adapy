@@ -76,7 +76,7 @@ with h5py.File('usps.h5', 'r') as hf:
 source_representer = load_model('M_s.h5') #load_model('source.h5') 
 source_classifier = load_model('Class.h5')
 
-adda = AdaPy(source_representer,source_classifier)
+adda = AdaPy(source_representer,source_classifier, algorithm="wadda", discriminator_per_representer_iterations=25)
 pre_transfer_accuracy = adda.target_model.evaluate(X_te, y_te)
 
 adda.fit(X_te,x_train)
