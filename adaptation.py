@@ -118,13 +118,11 @@ class AdaPy():
         if self.__domain_discriminator.name != "DomainDiscriminator":
           self.__domain_discriminator.name = "DomainDiscriminator"
     
-  def __train_domain_discriminator(self, iterations, target_labels, source_labels):
+  def __train_domain_discriminator(self, iterations, target_label, source_label):
     for _ in range(iterations):
-      target_data = self.target_data.get_batch()
-      source_data = self.source_data.get_batch()
       #TODO:issue Tensorboard   
-      target_latent = self.__target_representer.predict(target_data)
-      source_latent = self.__source_representer.predict(source_data)   
+      target_latent = self.__target_representer.predict(self.target_data.get_batch())
+      source_latent = self.__source_representer.predict(self.source_data.get_batch())   
       #TODO:Handle source batch differently?
       self.__domain_discriminator.train_on_batch(target_latent, target_label)
       self.__domain_discriminator.train_on_batch(source_latent, source_label)
@@ -145,20 +143,11 @@ class AdaPy():
       if isinstance(self.target_data, BatchGenerator_Numpy):
         source_label = np.ones((self.__batch_size, 1))
         target_label = np.zeros((self.__batch_size, 1))
-        
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
-
-        for epoch in tqdm(range(self.__epochs-1)):
-          self.__train_target.train_on_batch(target_data, source_label)
-          for _ in range(self.__discriminator_per_representer_iterations):
-            target_data = self.target_data.get_batch()
-            source_data = self.source_data.get_batch()
-            #TODO:issue Tensorboard   
-            target_latent = self.__target_representer.predict(target_data)
-            source_latent = self.__source_representer.predict(source_data)   
-            #TODO:Handle source batch differently?
-            self.__domain_discriminator.train_on_batch(target_latent, target_label)
-            self.__domain_discriminator.train_on_batch(source_latent, source_label)
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+        for _ in tqdm(range(self.__epochs-1)):
+          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+        self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
       
       if isinstance(self.target_data, BatchGenerator):
         #TODO: Add Batchgenerator training functionality
@@ -220,6 +209,15 @@ class AdaPy():
   def dpr(self,value):
     assert value >= 1, "dpr must be >= 1"
     self.__discriminator_per_representer_iterations = value
+
+  @property
+  def dpr0(self):
+    return self.__discriminator_per_representer_iterations_for0
+
+  @dpr.setter
+  def dpr0(self,value):
+    assert value >= 1, "dpr must be >= 1"
+    self.__discriminator_per_representer_iterations_for0 = value
 
   @property
   def domain_discriminator(self):
