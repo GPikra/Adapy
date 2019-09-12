@@ -64,13 +64,5 @@ y_test = one_hot(range(1,52), y_test)
 source_representer = load_model('Models/M_s.h5') 
 source_classifier = load_model('Models/Class.h5')
 
-<<<<<<< HEAD
 adda = AdaPy(source_representer,source_classifier)
 adda.fit('/home/demokritoscil/Desktop/dftimages_R_inputs/','/home/demokritoscil/Desktop/dftimages_M_inputs/')
-
-
-=======
-adda = AdaPy(source_representer,source_classifier, algorithm="wadda", discriminator_per_representer_iterations=25)
-pre_transfer_accuracy = adda.target_model.evaluate(X_te, y_te)
->>>>>>> 90aa9f22a5e2eb607dbf6e33b3a3246ed91c2b57
-

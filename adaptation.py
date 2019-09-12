@@ -168,33 +168,23 @@ class AdaPy():
     self.target_data = Xtarget
     self.source_data = Xsource
     if self.__algorithm == 'adda':
-      if isinstance(self.target_data, BatchGenerator_Numpy):
-        source_label = np.ones((self.__batch_size, 1))
-        target_label = np.zeros((self.__batch_size, 1))
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-        for _ in tqdm(range(iterations-1)):
-          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      source_label = np.ones((self.__batch_size, 1))
+      target_label = np.zeros((self.__batch_size, 1))
+      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      for _ in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-      
-      if isinstance(self.target_data, BatchGenerator):
-        #TODO: Add Batchgenerator training functionality
-        pass
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)   
         
     if self.__algorithm == "wadda":
-      if isinstance(self.target_data, BatchGenerator_Numpy):
-        source_label = np.ones((self.__batch_size, 1))
-        target_label = np.zeros((self.__batch_size, 1))
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-        for _ in tqdm(range(iterations-1)):
-          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      source_label = np.ones((self.__batch_size, 1))
+      target_label = np.zeros((self.__batch_size, 1))
+      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      for _ in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-      
-      if isinstance(self.target_data, BatchGenerator):
-        #TODO: Add Batchgenerator training functionality
-        pass
-      
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+
 
   @property
   def domain_discriminator_lr(self):
