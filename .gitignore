@@ -1,6 +1,12 @@
 *.txt
 
+rename_data_files.sh
+create_source.py
+getCMs.py
 test.py
 test
+
+Models
+source_log
 
 *.h5

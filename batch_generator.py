@@ -8,23 +8,22 @@ from auxilliary import crawl_directory, get_class, read_image, map_labels
 
 class BatchGenerator(keras.utils.Sequence):
 
-  def __init__(self, target_directory, batch_size, dimension, nchannels,
+  def __init__(self, target_directory, batch_size, input_shape,
                  nclasses, shuffle=True, is_labeled=True):
     """
     target_directory : absolute or relative path of the folder, where data files exist in
     batch_size       : number of samples each batch consist of
-    dimension        : dimension of the input data
-    nchannels        : number of channels in input data
+    input_shape      : dimension and number of channels of the input data
     nclasses         : number of classes to categorise data
     shuffle          : boolean that indicates if indices of data should be shuffled or not
     is_labeled       : boolean that shows if labels exist or not  
     """
 
-    self.__dimension_input = dimension
+    self.__dimension_input = input_shape[:-1]
     self.__batch_size = batch_size
     self.__is_labeled = is_labeled
     self.__target_directory = target_directory
-    self.__nchannels = nchannels
+    self.__nchannels = input_shape[-1]
     self.__nclasses = nclasses
     self.__shuffle = shuffle
 

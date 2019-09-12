@@ -61,7 +61,7 @@ def crawl_directory(dir):
       for _file in files:                                                                                        
         tree.append(subdir + "/" + _file)                                                                         
   #TODO: Make generator -> problems: cannot have dataSize , cannot have indexing in labels 
-  yield tree
+  return tree
 
 
 def get_class(path):

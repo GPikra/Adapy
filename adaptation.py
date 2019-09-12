@@ -41,8 +41,8 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0001,
-   discriminator_per_representer_iterations = 10,
-   discriminator_per_representer_iterations_for0 = 25,
+   discriminator_per_representer_iterations = 1,
+   discriminator_per_representer_iterations_for0 = 1,
    batch_size = 256,
    weight_clip_threshold = 0.05,
    epochs = 10,
@@ -168,33 +168,23 @@ class AdaPy():
     self.target_data = Xtarget
     self.source_data = Xsource
     if self.__algorithm == 'adda':
-      if isinstance(self.target_data, BatchGenerator_Numpy):
-        source_label = np.ones((self.__batch_size, 1))
-        target_label = np.zeros((self.__batch_size, 1))
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-        for _ in tqdm(range(iterations-1)):
-          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      source_label = np.ones((self.__batch_size, 1))
+      target_label = np.zeros((self.__batch_size, 1))
+      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      for _ in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-      
-      if isinstance(self.target_data, BatchGenerator):
-        #TODO: Add Batchgenerator training functionality
-        pass
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)   
         
     if self.__algorithm == "wadda":
-      if isinstance(self.target_data, BatchGenerator_Numpy):
-        source_label = np.ones((self.__batch_size, 1))
-        target_label = np.zeros((self.__batch_size, 1))
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-        for _ in tqdm(range(iterations-1)):
-          self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-          self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      source_label = np.ones((self.__batch_size, 1))
+      target_label = np.zeros((self.__batch_size, 1))
+      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      for _ in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
-      
-      if isinstance(self.target_data, BatchGenerator):
-        #TODO: Add Batchgenerator training functionality
-        pass
-      
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+
 
   @property
   def domain_discriminator_lr(self):
@@ -358,8 +348,8 @@ class AdaPy():
   def target_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid target domain directory"
-      self.__target_generator = BatchGenerator(value, self.__batch_size, self.input_shape[:-1], 
-                                                self.input_shape[-1], self.__nlabels, self.__shuffle, False)
+      self.__target_data = BatchGenerator(value, self.__batch_size, self.input_shape,
+                                          self.__nlabels, self.__shuffle, False)
 
     if isinstance(value, np.ndarray):
       assert value.shape[1:] == self.__shape[1:], "Invalid target domain dimensions"
@@ -374,8 +364,8 @@ class AdaPy():
   def source_data(self, value):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid source domain directory"
-      self.__source_generator = BatchGenerator(value,self.__batch_size, self.input_shape[:-1], 
-                                                self.input_shape[-1], self.__nlabels, self.__shuffle)
+      self.__source_data = BatchGenerator(value,self.__batch_size, self.input_shape, 
+                                          self.__nlabels, self.__shuffle,False)
 
     if isinstance(value, np.ndarray):
       assert value.shape[1:] == self.__shape[1:], "Invalid source domain dimensions"
