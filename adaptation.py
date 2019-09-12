@@ -41,11 +41,11 @@ class AdaPy():
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
    target_representer_lr = 0.0001,
-   discriminator_per_representer_iterations = 1,
-   discriminator_per_representer_iterations_for0 = 1,
+   discriminator_per_representer_iterations = 3,
+   discriminator_per_representer_iterations_for0 = 3,
    batch_size = 256,
    weight_clip_threshold = 0.05,
-   epochs = 10,
+   epochs = 5,
    output_directory = "Models/",
    lipschitz = "clip"
    ):
@@ -171,7 +171,7 @@ class AdaPy():
       source_label = np.ones((self.__batch_size, 1))
       target_label = np.zeros((self.__batch_size, 1))
       self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-      for _ in tqdm(range(iterations-1)):
+      for i in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
         self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
       self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)   
