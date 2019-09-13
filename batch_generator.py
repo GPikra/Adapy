@@ -20,15 +20,18 @@ class BatchGenerator(keras.utils.Sequence):
     """
 
     self.__dimension_input = input_shape[:-1]
-    self.__batch_size = batch_size
-    self.__is_labeled = is_labeled
     self.__target_directory = target_directory
-    self.__nchannels = input_shape[-1]
-    self.__nclasses = nclasses
-    self.__shuffle = shuffle
-
     self.__crawled_directory = crawl_directory(self.__target_directory)
     self.__datasetSize = len(self.__crawled_directory)
+
+    if batch_size == -1:
+      batch_size = self.__datasetSize
+
+    self.__batch_size = batch_size
+    self.__is_labeled = is_labeled
+    self.__nchannels = input_shape[-1]
+    self.__nclasses = nclasses
+    self.__shuffle = shuffle    
     if self.__is_labeled:
       self.__labels = map_labels(self.__crawled_directory)
     else:
