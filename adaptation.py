@@ -186,6 +186,14 @@ class AdaPy():
       self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
 
 
+  def predict(self,Xtarget):
+    """
+    Wrapper for target_model.predict()
+    """
+
+    return self.target_model.predict(Xtarget)
+
+
   @property
   def domain_discriminator_lr(self):
     return self.__discriminator_learning_rate
