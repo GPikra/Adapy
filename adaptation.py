@@ -11,7 +11,7 @@ import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
 
-from auxilliary import copy_model, WeightClip, wasserstein_loss
+from auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
 from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 
@@ -40,9 +40,9 @@ class AdaPy():
    algorithm="adda", 
    domain_discriminator = "linear", 
    discriminator_lr = 0.001,
-   target_representer_lr = 0.0001,
-   discriminator_per_representer_iterations = 1,
-   discriminator_per_representer_iterations_for0 = 1,
+   target_representer_lr = 0.0002,
+   discriminator_per_representer_iterations = 10,
+   discriminator_per_representer_iterations_for0 = 25,
    batch_size = 256,
    weight_clip_threshold = 0.05,
    epochs = 10,
@@ -67,8 +67,11 @@ class AdaPy():
     self.__batch_size = batch_size
     self.__latent_dimensions = source_representer.output_shape[1]
     self.__shape = source_representer.input_shape
-    self.__nlabels = source_classifier.output_shape
-
+    self.__nlabels = source_classifier.output_shape[-1]
+    if index_to_label_dictionary is None:
+      self.__index_to_label_dictionary = {k:"" for k in range(self.__nlabels)}
+    else:
+      self.__index_to_label_dictionary = index_to_label_dictionary
     self.__initialize_models(source_representer, source_classifier, domain_discriminator)
     self.__define_models_for_training_and_inference()
     self.compile_models()
@@ -181,9 +184,9 @@ class AdaPy():
       target_label = np.zeros((self.__batch_size, 1))
       self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
       for _ in tqdm(range(iterations-1)):
-        self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+        self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
         self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
-      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
 
 
   def predict(self,Xtarget):
@@ -194,17 +197,22 @@ class AdaPy():
     return self.target_model.predict(Xtarget)
 
 
-  def evaluate(self, value):
+  def evaluate(self, value, labels=None):
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid validation set directory"
       validation_data = BatchGenerator(value, -1, self.input_shape,
-                                          self.__nlabels, self.__shuffle, True)
-
+                            self.__nlabels, self.__shuffle, True)
+      X,y = validation_data.get_batch()
+      y = one_hot(y,np.array(list(self.__index_to_label_dictionary.keys())))
+      return self.target_model.evaluate(X,y)
     if isinstance(value, np.ndarray):
+      try:
+        #TODO: Possibly review?
+        labels = one_hot(labels,np.array(list(self.__index_to_label_dictionary.keys())))
+      except Exception:
+        raise TypeError("Invalid labels were passed. Must be convertable to string.")
       assert value.shape[1:] == self.__shape[1:], "Invalid target domain dimensions"
-      validation_data = BatchGenerator_Numpy(value, -1, self.__shuffle)
-    
-    return self.target_model.evaluate(validation_data)
+      return self.target_model.evaluate(value,labels)
     
 
   @property

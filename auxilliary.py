@@ -98,7 +98,7 @@ def map_labels(directories):
   return mapped_labels
 
 
-def one_hot(labels, data_labels):
+def one_hot(data_labels, labels):
   """
   Converts labels to one-hot encodings
 
