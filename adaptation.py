@@ -121,8 +121,8 @@ class AdaPy():
   def __train_domain_discriminator(self, iterations, target_label, source_label):
     for _ in range(iterations):
       #TODO:issue Tensorboard   
-      target_latent = self.__target_representer.predict(self.target_data.get_batch())
-      source_latent = self.__source_representer.predict(self.source_data.get_batch())   
+      target_latent = self.__target_representer.predict(self.target_data.get_batch()[0])
+      source_latent = self.__source_representer.predict(self.source_data.get_batch()[0])   
       #TODO:Handle source batch differently?
       self.__domain_discriminator.train_on_batch(target_latent, target_label)
       self.__domain_discriminator.train_on_batch(source_latent, source_label)
@@ -172,9 +172,9 @@ class AdaPy():
       target_label = np.zeros((self.__batch_size, 1))
       self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
       for _ in tqdm(range(iterations-1)):
-        self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)
+        self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
         self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
-      self.__train_target.train_on_batch(self.target_data.get_batch(), source_label)   
+      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)   
         
     if self.__algorithm == "wadda":
       source_label = np.ones((self.__batch_size, 1))
@@ -193,6 +193,19 @@ class AdaPy():
 
     return self.target_model.predict(Xtarget)
 
+
+  def evaluate(self, value):
+    if isinstance(value, str):
+      assert os.path.exists(value), "Invalid validation set directory"
+      validation_data = BatchGenerator(value, -1, self.input_shape,
+                                          self.__nlabels, self.__shuffle, True)
+
+    if isinstance(value, np.ndarray):
+      assert value.shape[1:] == self.__shape[1:], "Invalid target domain dimensions"
+      validation_data = BatchGenerator_Numpy(value, -1, self.__shuffle)
+    
+    return self.target_model.evaluate(validation_data)
+    
 
   @property
   def domain_discriminator_lr(self):
