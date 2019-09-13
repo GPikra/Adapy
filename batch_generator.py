@@ -69,6 +69,7 @@ class BatchGenerator(keras.utils.Sequence):
     X = np.empty((self.__batch_size, *self.__dimension_input, self.__nchannels))
     y = np.empty((self.__batch_size), dtype=np.int8)
     for i, filename in enumerate(list_of_batch_files):
+      #TODO: Investigate issue with emotion speccs?
       X[i], y[i] = read_image(filename, self.__labels, self.__is_labeled)
     return X, y
 
