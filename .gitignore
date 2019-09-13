@@ -9,4 +9,6 @@ test
 Models
 source_log
 
+__pycache__
+
 *.h5
