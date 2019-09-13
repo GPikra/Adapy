@@ -91,9 +91,12 @@ class BatchGenerator_Numpy():
 
     assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
     self.__data = data
-    self.__batch_size = batch_size
     self.__shuffle = shuffle
     self.__datasetSize = self.__data.shape[0]
+    if batch_size == -1:
+      batch_size = self.__datasetSize
+    self.__batch_size = batch_size
+
 
   def __getitem__(self, index):
     if index == -1:
