@@ -4,6 +4,7 @@ import numpy as np
 from keras.models import clone_model
 import keras.backend as K
 from keras.constraints import Constraint
+import cv2 as cv
 
 class WeightClip(Constraint):
   """
@@ -72,9 +73,9 @@ def get_class(path):
   absolute_subdirectory = path[:path.rfind("/")]
   return absolute_subdirectory[absolute_subdirectory.rfind("/")+1:]
 
-
+#TODO: Add arguments to handle different channel formats (RGB, BGR etc)
 def read_image(path, mapped_labels, is_labeled=True):
-  read_image = imageio.imread(path)
+  read_image = cv.imread(path)
   if is_labeled:
     label = get_class(path)
     return read_image, mapped_labels[label]
