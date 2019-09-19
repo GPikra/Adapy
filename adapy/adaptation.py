@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import warnings
+warnings.simplefilter(action='ignore')
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import os
@@ -11,8 +13,8 @@ import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
 
-from auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
-from batch_generator import BatchGenerator, BatchGenerator_Numpy
+from adapy.auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
+from adapy.batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 
 class AdaPy():
