@@ -20,7 +20,8 @@ The  aim  is  to  reach  an  equillibrium  (point  of  convergence)  where *D* i
 
 ##### Getting it
 To download adapy, you can either fork this github repository or use Pypi via pip.
-```
+
+```sh
 $ pip install adapy
 ```
 
@@ -28,7 +29,7 @@ $ pip install adapy
 
 Adapy was programmed to be initialized with a source representation model and use the same classifier that has been produced during the training part of source model. 
 
-```Python
+```sh
 $ from adapy import Adapy
 ```
 
