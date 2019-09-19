@@ -2,13 +2,13 @@ from distutils.core import setup
 setup(
   name = 'adapy',
   packages = ['adapy'],
-  version = '0.1',
+  version = '0.2',
   license='MIT',
   description = 'Library for domain adaptation',
   author = 'George Pikramenos, Eleanna Vali',
   author_email = 'gpik@di.uoa.gr',
   url = 'https://github.com/GPikra/Adapy',
-  download_url = 'https://github.com/GPikra/Adapy/archive/v_01.tar.gz',
+  download_url = 'https://github.com/GPikra/Adapy/archive/v_02.tar.gz',
   keywords = ['domain adaptation','tranfer learning'],
   install_requires=[
           'keras',
