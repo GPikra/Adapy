@@ -20,15 +20,18 @@ class BatchGenerator(keras.utils.Sequence):
     """
 
     self.__dimension_input = input_shape[:-1]
-    self.__batch_size = batch_size
-    self.__is_labeled = is_labeled
     self.__target_directory = target_directory
-    self.__nchannels = input_shape[-1]
-    self.__nclasses = nclasses
-    self.__shuffle = shuffle
-
     self.__crawled_directory = crawl_directory(self.__target_directory)
     self.__datasetSize = len(self.__crawled_directory)
+
+    if batch_size == -1:
+      batch_size = self.__datasetSize
+
+    self.__batch_size = batch_size
+    self.__is_labeled = is_labeled
+    self.__nchannels = input_shape[-1]
+    self.__nclasses = nclasses
+    self.__shuffle = shuffle    
     if self.__is_labeled:
       self.__labels = map_labels(self.__crawled_directory)
     else:
@@ -50,7 +53,7 @@ class BatchGenerator(keras.utils.Sequence):
     X, y = self.__data_generation(list_of_batch_files)
     if self.__is_labeled:
       return X, y
-    return X
+    return X, -1
 
     
   def on_epoch_end(self):
@@ -78,18 +81,22 @@ class BatchGenerator(keras.utils.Sequence):
 
 class BatchGenerator_Numpy():
 
-  def __init__(self, data, batch_size, shuffle=True):
+  def __init__(self, data, batch_size, shuffle=True, is_labeled = []):
     """
     data       : numpy array of data
     batch_size : number of samples each batch consist of
     shuffle    : boolean that indicates if indices of data should be shuffled or not
     """
-
+    assert isinstance(is_labeled, list), "'is_labeled' must be a list of labels (possibly empty)"
     assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
     self.__data = data
-    self.__batch_size = batch_size
     self.__shuffle = shuffle
+    self.__is_labeled = is_labeled
     self.__datasetSize = self.__data.shape[0]
+    if batch_size == -1:
+      batch_size = self.__datasetSize
+    self.__batch_size = batch_size
+
 
   def __getitem__(self, index):
     if index == -1:
@@ -101,7 +108,9 @@ class BatchGenerator_Numpy():
       np.random.shuffle(self.__indices)
 
     indices = self.__indices[index*self.__batch_size:(index+1)*self.__batch_size]
-    return np.array([self.__data[i] for i in indices])
+    if self.__is_labeled:
+      return np.array([self.__data[i] for i in indices]), self.__is_labeled[indices]
+    return np.array([self.__data[i] for i in indices]), -1
 
   def get_batch(self, index=-1):
     return self.__getitem__(index)
