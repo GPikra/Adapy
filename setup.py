@@ -7,17 +7,18 @@ setup(
   description = 'Library for domain adaptation',
   author = 'George Pikramenos, Eleanna Vali',
   author_email = 'gpik@di.uoa.gr',
-  url = 'https://gitlab.com/cillab/adapy',
-  download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # not ready!!!!!
-  keywords = ['adaptation'],   # Keywords that define our package best
+  url = 'https://github.com/GPikra/Adapy',
+  download_url = 'https://github.com/GPikra/Adapy/archive/v_01.tar.gz',
+  keywords = ['domain adaptation','tranfer learning'],
   install_requires=[
           'keras',
           'tqdm',
           'numpy',
-          'imageio'
+          'imageio',
+          'tensorflow'
       ],
   classifiers=[
-    'Development Status :: 3 - Alpha',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package    
+    'Development Status :: 3 - Alpha',   
     'Intended Audience :: Developers', 
     'Topic :: Software Development :: Build Tools',    
     'License :: OSI Approved :: MIT License',    
