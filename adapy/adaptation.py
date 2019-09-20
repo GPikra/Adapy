@@ -215,12 +215,7 @@ class AdaPy():
       assert os.path.exists(value), "Invalid validation set directory"
       keras_generator=ImageDataGenerator().flow_from_directory(value,\
         target_size=self.input_shape[:-1],batch_size=self.__batch_size,class_mode='categorical')
-      self.target_model.evaluate_generator(keras_generator, steps=20)
-      validation_data = BatchGenerator(value, -1, self.input_shape,
-                            self.__nlabels, self.__shuffle, True)
-      X, y = validation_data.get_batch()
-      y = one_hot(y,np.array(list(self.__index_to_label_dictionary.keys())))
-      return self.target_model.evaluate(X,y)
+      return self.target_model.evaluate_generator(keras_generator, steps=20)
 
     if isinstance(value, np.ndarray):
       try:
