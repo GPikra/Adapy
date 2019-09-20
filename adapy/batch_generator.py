@@ -2,7 +2,7 @@ import keras
 import random
 import numpy as np
 
-from auxilliary import crawl_directory, get_class, read_image, map_labels
+from adapy.auxilliary import crawl_directory, get_class, read_image, map_labels
 
 #https://github.com/afshinea/keras-data-generator
 
