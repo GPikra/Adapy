@@ -22,7 +22,7 @@ The  aim  is  to  reach  an  equillibrium  (point  of  convergence)  where *D* i
 To download adapy, you can either fork this github repository or use Pypi via pip.
 
 ```sh
-$ pip install adapy
+$ pip install adapy==0.2
 ```
 
 ##### Using it
