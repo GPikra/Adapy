@@ -12,6 +12,7 @@ import keras as K
 import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
+from keras.preprocessing.image import ImageDataGenerator
 
 from adapy.auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
 from adapy.batch_generator import BatchGenerator, BatchGenerator_Numpy
@@ -212,6 +213,9 @@ class AdaPy():
 
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid validation set directory"
+      keras_generator=ImageDataGenerator().flow_from_directory(value,\
+        target_size=self.input_shape[:-1],batch_size=self.__batch_size,class_mode='categorical')
+      self.target_model.evaluate_generator(keras_generator, steps=20)
       validation_data = BatchGenerator(value, -1, self.input_shape,
                             self.__nlabels, self.__shuffle, True)
       X, y = validation_data.get_batch()
@@ -226,6 +230,7 @@ class AdaPy():
         raise TypeError("Invalid labels were passed. Must be convertable to string.")
       assert value.shape[1:] == self.__shape[1:], "Invalid target domain dimensions"
       return self.target_model.evaluate(value,labels)
+
     
 
   @property

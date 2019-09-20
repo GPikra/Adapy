@@ -2,7 +2,7 @@ import keras
 import random
 import numpy as np
 
-from adapy.auxilliary import crawl_directory, get_class, read_image, map_labels
+from adapy.auxilliary import crawl_directory, get_class, read_image
 
 #https://github.com/afshinea/keras-data-generator
 
@@ -32,10 +32,6 @@ class BatchGenerator(keras.utils.Sequence):
     self.__nchannels = input_shape[-1]
     self.__nclasses = nclasses
     self.__shuffle = shuffle    
-    if self.__is_labeled:
-      self.__labels = map_labels(self.__crawled_directory)
-    else:
-      self.__labels = {}
     self.on_epoch_end()
 
     
@@ -73,7 +69,7 @@ class BatchGenerator(keras.utils.Sequence):
     X = np.empty((self.__batch_size, *self.__dimension_input, self.__nchannels))
     y = np.empty((self.__batch_size), dtype=np.int8)
     for i, filename in enumerate(list_of_batch_files):
-      X[i], y[i] = read_image(filename, self.__labels, self.__is_labeled)
+      X[i], y[i] = read_image(filename, self.__is_labeled)
     return X, y
 
   def get_batch(self, index=-1):

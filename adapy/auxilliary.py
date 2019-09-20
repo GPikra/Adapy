@@ -74,12 +74,13 @@ def get_class(path):
   return absolute_subdirectory[absolute_subdirectory.rfind("/")+1:]
 
 #TODO: Add arguments to handle different channel formats (RGB, BGR etc)
-def read_image(path, mapped_labels, is_labeled=True):
+def read_image(path, is_labeled=True):
   read_image = cv.imread(path)
   if is_labeled:
     label = get_class(path)
-    return read_image, mapped_labels[label]
+    return read_image, label
   return read_image, -1
+
 
 
 def map_labels(directories):
