@@ -20,7 +20,6 @@ from adapy.batch_generator import BatchGenerator, BatchGenerator_Numpy
 class AdaPy():
   """
     Simple class for adversarial domain adaptation bases on keras and tensorflow. 
-
       Input:
         - source_representer                       : model be trained by source data
         - source_classifier                        : model of classifier be trained by source data
@@ -162,9 +161,7 @@ class AdaPy():
   def fit(self, Xtarget, Xsource, iterations=None):
     """
     Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in 
-
     Xsource : numpy array of source data or absolute/relative path of the folder, where source data files exist in 
-
     iterations  : number of epochs that model will be trained for
     """
 
