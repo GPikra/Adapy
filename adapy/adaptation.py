@@ -13,13 +13,14 @@ import keras.layers as l
 import keras.optimizers as o
 from keras.models import Model
 
-from adapy.auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
-from adapy.batch_generator import BatchGenerator, BatchGenerator_Numpy
+from auxilliary import copy_model, WeightClip, wasserstein_loss, one_hot
+from batch_generator import BatchGenerator, BatchGenerator_Numpy
 
 
 class AdaPy():
   """
     Simple class for adversarial domain adaptation bases on keras and tensorflow. 
+
       Input:
         - source_representer                       : model be trained by source data
         - source_classifier                        : model of classifier be trained by source data
@@ -158,35 +159,43 @@ class AdaPy():
     self.__train_target.name = "TrainTarget"
 
 
-  def fit(self, Xtarget, Xsource, iterations=None):
+  def fit(self, Xtarget, Xsource, iterations=None, validation_data = None, iterations_per_validation = 1, check_mode_collapse = True):
     """
     Xtarget : numpy array of target data or absolute/relative path of the folder, where target data files exist in 
+
     Xsource : numpy array of source data or absolute/relative path of the folder, where source data files exist in 
-    iterations  : number of epochs that model will be trained for
+
+    iterations  : integer, number of epochs that model will be trained for
+
+    logs: Boolean, Whether to monitor validation accuracy
     """
 
     if iterations is None: iterations = self.__epochs
 
     self.target_data = Xtarget
     self.source_data = Xsource
+    source_label = np.ones((self.__batch_size, 1))
     if self.__algorithm == 'adda':
-      source_label = np.ones((self.__batch_size, 1))
       target_label = np.zeros((self.__batch_size, 1))
-      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
-      for _ in tqdm(range(iterations-1)):
-        self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
-        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
-      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)   
-        
     if self.__algorithm == "wadda":
-      source_label = np.ones((self.__batch_size, 1))
-      target_label = np.zeros((self.__batch_size, 1))
-      self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+      target_label = -np.ones((self.__batch_size, 1))
+
+    self.__train_domain_discriminator(self.__discriminator_per_representer_iterations_for0, target_label, source_label)
+    if validation_data is None:
       for _ in tqdm(range(iterations-1)):
         self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
         self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
-      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
-
+      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)  
+    else:
+      for _iter in tqdm(range(iterations-1)):
+        self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)
+        self.__train_domain_discriminator(self.__discriminator_per_representer_iterations, target_label, source_label)
+        if (_iter % iterations_per_validation == 0) and (_iter !=0): 
+          print("Iteration: ", _iter, ", accuracy: ", self.evaluate(Xtarget))
+          if check_mode_collapse:
+            predictions = self.predict(Xtarget)
+      self.__train_target.train_on_batch(self.target_data.get_batch()[0], source_label)    
+     
 
   def predict(self,Xtarget):
     """
@@ -197,13 +206,18 @@ class AdaPy():
 
 
   def evaluate(self, value, labels=None):
+    """
+    #TODO: Write description
+    """
+
     if isinstance(value, str):
       assert os.path.exists(value), "Invalid validation set directory"
       validation_data = BatchGenerator(value, -1, self.input_shape,
                             self.__nlabels, self.__shuffle, True)
-      X,y = validation_data.get_batch()
+      X, y = validation_data.get_batch()
       y = one_hot(y,np.array(list(self.__index_to_label_dictionary.keys())))
       return self.target_model.evaluate(X,y)
+
     if isinstance(value, np.ndarray):
       try:
         #TODO: Possibly review?

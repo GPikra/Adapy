@@ -2,7 +2,7 @@ import keras
 import random
 import numpy as np
 
-from adapy.auxilliary import crawl_directory, get_class, read_image, map_labels
+from auxilliary import crawl_directory, get_class, read_image, map_labels
 
 #https://github.com/afshinea/keras-data-generator
 
@@ -21,12 +21,12 @@ class BatchGenerator(keras.utils.Sequence):
 
     self.__dimension_input = input_shape[:-1]
     self.__target_directory = target_directory
-    self.__crawled_directory = crawl_directory(self.__target_directory)
+    self.__crawled_directory = sorted(crawl_directory(self.__target_directory))
     self.__datasetSize = len(self.__crawled_directory)
 
     if batch_size == -1:
       batch_size = self.__datasetSize
-
+    
     self.__batch_size = batch_size
     self.__is_labeled = is_labeled
     self.__nchannels = input_shape[-1]
@@ -43,7 +43,7 @@ class BatchGenerator(keras.utils.Sequence):
     """
     Generate one batch of data
     """
-
+    
     if index == -1:
       upto = (self.__datasetSize//self.__batch_size)-1
       index = random.randint(0, upto)
@@ -60,6 +60,7 @@ class BatchGenerator(keras.utils.Sequence):
     """
     Shuffle indices after each epoch
     """
+
     self.__indices = np.arange(self.__datasetSize)
     if self.__shuffle == True:
       np.random.shuffle(self.__indices)
@@ -87,6 +88,7 @@ class BatchGenerator_Numpy():
     batch_size : number of samples each batch consist of
     shuffle    : boolean that indicates if indices of data should be shuffled or not
     """
+
     assert isinstance(is_labeled, list), "'is_labeled' must be a list of labels (possibly empty)"
     assert isinstance(data, np.ndarray), "Data must be a numpy array in 'BatchGenerator_numpy'"
     self.__data = data
@@ -99,6 +101,7 @@ class BatchGenerator_Numpy():
 
 
   def __getitem__(self, index):
+   
     if index == -1:
       upto = (self.__datasetSize//self.__batch_size)-1
       index = random.randint(0, upto)

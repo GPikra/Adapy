@@ -92,6 +92,7 @@ def map_labels(directories):
     labels.add(get_class(path))
   mapped_labels = {}
   i = 0
+  labels = sorted(list(labels))
   for label in labels:
     mapped_labels[label] = i
     i+=1
