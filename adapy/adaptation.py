@@ -109,8 +109,8 @@ class AdaPy():
         self.__domain_discriminator.name = "DomainDiscriminator"
       else:
         assert isinstance(domain_discriminator, K.engine.training.Model), "Provide keras model for domain discriminator"
-        assert domain_discriminator.output_shape == self.__nlabels, "Domain discriminator must be a binary classifier"
-        assert domain_discriminator.input_shape == self.__latent_dimensions, "Domain discriminator input dimensionality was invalid"
+        assert domain_discriminator.output_shape[1] == 1, "Domain discriminator must be a binary classifier"
+        assert domain_discriminator.input_shape[1] == self.__latent_dimensions, "Domain discriminator input dimensionality was invalid"
         self.__domain_discriminator = domain_discriminator
         if self.__domain_discriminator.name != "DomainDiscriminator":
           self.__domain_discriminator.name = "DomainDiscriminator"
@@ -122,6 +122,13 @@ class AdaPy():
         #TODO: Add a WARNING!
         self.__domain_discriminator = Model(latent_representation, classifier)
         self.__domain_discriminator.name = "DomainDiscriminator"
+      else:
+        assert isinstance(domain_discriminator, K.engine.training.Model), "Provide keras model for domain discriminator"
+        assert domain_discriminator.output_shape[1] == 1, "Domain discriminator must be a binary classifier"
+        assert domain_discriminator.input_shape[1] == self.__latent_dimensions, "Domain discriminator input dimensionality was invalid"
+        self.__domain_discriminator = domain_discriminator
+        if self.__domain_discriminator.name != "DomainDiscriminator":
+          self.__domain_discriminator.name = "DomainDiscriminator"
     
 
   def __train_domain_discriminator(self, iterations, target_label, source_label):
