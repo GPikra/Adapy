@@ -3,6 +3,8 @@
 rename_data_files.sh
 test.py
 test
+dist
+MANIFEST
 
 Models
 source_log
