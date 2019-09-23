@@ -1,8 +1,6 @@
 *.txt
 
 rename_data_files.sh
-create_source.py
-getCMS.py
 test.py
 test
 
