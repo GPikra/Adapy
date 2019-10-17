@@ -1,6 +1,5 @@
 # ADAPY
 
-[![CIL](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1N5_BGx5XO3apgxc6N-4dnKbuQrfoxbb0IyJpNHtfNTk6Jkf_)](https://www.iit.demokritos.gr/)
 
 ![Build Status](https://travis-ci.org/travis-ci/travis-web.svg?branch=master) [![Python 3.4](https://img.shields.io/badge/python-3.4-blue.svg)](https://www.python.org/downloads/release/python-340/) [![Python 3.4](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
 
